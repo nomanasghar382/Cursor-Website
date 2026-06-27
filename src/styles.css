@@ -39,8 +39,8 @@ canvas {
 }
 
 ::selection {
-  color: #0b0e14;
-  background: #00d9c0;
+  color: #f5f6fa;
+  background: #4f8cff;
 }
 
 @media (prefers-reduced-motion: reduce) {

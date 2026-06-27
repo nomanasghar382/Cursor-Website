@@ -167,6 +167,7 @@ function App() {
     [cart],
   );
 
+  const resultCount = filteredProducts.length;
   const cartCount = useMemo(() => Object.values(cart).reduce((sum, quantity) => sum + quantity, 0), [cart]);
   const wishlistCount = wishlist.length;
 
@@ -216,29 +217,53 @@ function App() {
   };
 
   return (
-    <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-[#0B0E14] text-[#F5F6FA]">
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_20%_15%,rgba(110,86,248,0.24),transparent_32%),radial-gradient(circle_at_80%_10%,rgba(0,217,192,0.16),transparent_24%),linear-gradient(180deg,#0B0E14_0%,#090B10_100%)]" />
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-30 [background-image:linear-gradient(rgba(245,246,250,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(245,246,250,0.045)_1px,transparent_1px)] [background-size:72px_72px]" />
+    <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-[#0F131A] text-[#F4F7FF]">
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_12%_10%,rgba(79,140,255,0.2),transparent_35%),radial-gradient(circle_at_90%_15%,rgba(124,131,255,0.15),transparent_26%),linear-gradient(180deg,#0F131A_0%,#0C1118_100%)]" />
+      <div className="pointer-events-none fixed inset-0 z-0 opacity-15 [background-image:linear-gradient(rgba(228,235,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(228,235,255,0.04)_1px,transparent_1px)] [background-size:80px_80px]" />
 
       <section className="relative z-10 min-h-screen px-5 py-6 sm:px-8 lg:px-12">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-white/10 bg-white/[0.04] px-5 py-4 shadow-2xl shadow-black/30 backdrop-blur-xl">
+        <nav className="sticky top-4 z-30 mx-auto flex max-w-7xl flex-col gap-4 rounded-[1.4rem] border border-[#2A3344] bg-[#141B25]/95 px-4 py-4 shadow-xl shadow-black/30 backdrop-blur-xl lg:flex-row lg:items-center">
           <a href="#top" className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-[#6E56F8] to-[#00D9C0] font-black text-[#0B0E14]">
+            <span className="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-[#4F8CFF] to-[#7C83FF] font-black text-[#0D1420]">
               N
             </span>
-            <span className="font-semibold tracking-[0.24em] text-white">NEXORA AI</span>
+            <span className="font-semibold tracking-[0.16em] text-[#F4F7FF]">NEXORA AI</span>
           </a>
-          <div className="hidden items-center gap-7 text-sm text-[#9AA1B2] md:flex">
-            <a href="#catalog" className="transition hover:text-white">Products</a>
-            <a href="#assistant" className="transition hover:text-white">AI Assistant</a>
-            <a href="#checkout" className="transition hover:text-white">Checkout</a>
+
+          <div className="grid flex-1 gap-2 sm:grid-cols-[150px_1fr_auto]">
+            <select
+              value={selectedCategory}
+              onChange={(event) => setSelectedCategory(event.target.value as (typeof productCategories)[number])}
+              className="rounded-xl border border-[#303B50] bg-[#0F141D] px-3 py-3 text-sm text-[#DDE5F7] outline-none ring-[#4F8CFF]/55 focus:ring-2"
+            >
+              {productCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search products (e.g. headphones, smartwatch, smart home)"
+              className="rounded-xl border border-[#303B50] bg-[#0F141D] px-4 py-3 text-sm text-[#F4F7FF] outline-none ring-[#4F8CFF]/55 placeholder:text-[#8B96AF] focus:ring-2"
+            />
+            <a
+              href="#catalog"
+              className="grid place-items-center rounded-xl border border-[#FFB547]/55 bg-[#FFB547]/18 px-5 py-3 text-sm font-semibold text-[#FFE5B4] transition hover:bg-[#FFB547]/28"
+            >
+              Search
+            </a>
           </div>
-          <a
-            href="#catalog"
-            className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#0B0E14] shadow-[0_0_36px_rgba(245,246,250,0.22)] transition hover:scale-105"
-          >
-            Shop now
-          </a>
+
+          <div className="flex items-center gap-2">
+            <a href="#catalog" className="rounded-xl border border-[#303B50] bg-[#0F141D] px-3 py-2 text-sm text-[#D7DFF1]">
+              Wishlist {wishlistCount}
+            </a>
+            <a href="#checkout" className="rounded-xl border border-[#303B50] bg-[#0F141D] px-3 py-2 text-sm text-[#D7DFF1]">
+              Cart {cartCount}
+            </a>
+          </div>
         </nav>
 
         <div id="top" className="mx-auto grid min-h-[calc(100vh-96px)] max-w-7xl items-center gap-10 pt-10 lg:grid-cols-[0.92fr_1.08fr]">
@@ -247,7 +272,7 @@ function App() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
-              className="mb-5 inline-flex rounded-full border border-[#00D9C0]/30 bg-[#00D9C0]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.32em] text-[#00D9C0]"
+              className="mb-5 inline-flex rounded-full border border-[#4F8CFF]/40 bg-[#4F8CFF]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#A9C4FF]"
             >
               AI commerce intelligence
             </motion.p>
@@ -273,28 +298,28 @@ function App() {
               transition={{ duration: 0.75, delay: 0.35 }}
               className="mt-9 flex flex-col gap-4 sm:flex-row"
             >
-              <a href="#catalog" className="rounded-full bg-gradient-to-r from-[#6E56F8] to-[#00D9C0] px-7 py-4 text-center font-bold text-white shadow-[0_0_44px_rgba(0,217,192,0.22)] transition hover:-translate-y-1">
+              <a href="#catalog" className="rounded-full bg-gradient-to-r from-[#4F8CFF] to-[#7C83FF] px-7 py-4 text-center font-bold text-white shadow-[0_0_40px_rgba(79,140,255,0.22)] transition hover:-translate-y-1">
                 Explore intelligence
               </a>
-              <a href="#checkout" className="rounded-full border border-white/15 bg-white/[0.06] px-7 py-4 text-center font-bold text-white backdrop-blur-xl transition hover:-translate-y-1 hover:border-[#00D9C0]/50">
+              <a href="#checkout" className="rounded-full border border-[#303B50] bg-[#121A25] px-7 py-4 text-center font-bold text-white transition hover:-translate-y-1 hover:border-[#4F8CFF]/50">
                 Go to checkout
               </a>
             </motion.div>
             <div className="mt-12 grid max-w-2xl grid-cols-3 gap-3">
               {metrics.map((metric) => (
-                <div key={metric.label} className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
+                <div key={metric.label} className="rounded-2xl border border-[#2D3647] bg-[#151C27] p-4">
                   <p className="text-2xl font-black text-white">{metric.value}</p>
-                  <p className="mt-1 text-xs text-[#9AA1B2]">{metric.label}</p>
+                  <p className="mt-1 text-xs text-[#9AA4BA]">{metric.label}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div id="demo" className="relative h-[560px] min-h-[48vh] overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/30 shadow-[0_40px_160px_rgba(0,0,0,0.55)] backdrop-blur">
+          <div id="demo" className="relative h-[560px] min-h-[48vh] overflow-hidden rounded-[2rem] border border-[#2A3344] bg-[#0D121A] shadow-[0_40px_120px_rgba(0,0,0,0.45)]">
             <Suspense fallback={<div className="grid h-full place-items-center text-sm text-[#9AA1B2]">Loading NEXORA 3D engine...</div>}>
               <MarketplaceScene activePhase={activePhase} />
             </Suspense>
-            <div className="pointer-events-none absolute inset-x-6 bottom-6 rounded-3xl border border-white/10 bg-[#0B0E14]/70 p-4 backdrop-blur-2xl">
+            <div className="pointer-events-none absolute inset-x-6 bottom-6 rounded-2xl border border-[#2D3647] bg-[#111923]/85 p-4">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activePhase}
@@ -332,27 +357,28 @@ function App() {
       </section>
 
       <section id="catalog" className="relative z-10 mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
-        <div data-reveal className="mb-8 flex flex-col gap-6 rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 backdrop-blur-xl lg:flex-row lg:items-end lg:justify-between">
+        <div data-reveal className="mb-8 flex flex-col gap-6 rounded-[1.4rem] border border-[#2A3344] bg-[#141B25]/95 p-6 backdrop-blur-xl lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#00D9C0]">Full product listing</p>
-            <h2 className="mt-3 text-4xl font-black tracking-[-0.05em] text-white sm:text-5xl">
-              AI-curated premium catalog.
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#7FA2FF]">Full product listing</p>
+            <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl">
+              Easy shopping, premium visuals.
             </h2>
-            <p className="mt-4 max-w-2xl text-[#AAB1C2]">
-              Search by intent, filter by category, sort by AI confidence, and build wishlist/cart with conversion-focused UX.
+            <p className="mt-3 max-w-2xl text-[#AFB8CC]">
+              Select category, type product name, press search. This flow is designed for first-time users like Amazon.
             </p>
+            <p className="mt-2 text-sm text-[#7F8AA3]">{resultCount} products found</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
             <input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search: audio, gifts, smart home..."
-              className="w-full rounded-xl border border-white/15 bg-[#0B0E14]/70 px-4 py-3 text-sm text-white outline-none ring-[#00D9C0]/50 placeholder:text-[#7F879B] focus:ring-2"
+              placeholder="Try: smart watch, audio, home"
+              className="w-full rounded-xl border border-[#303B50] bg-[#0F141D] px-4 py-3 text-sm text-white outline-none ring-[#4F8CFF]/55 placeholder:text-[#7F879B] focus:ring-2"
             />
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value as SortOption)}
-              className="rounded-xl border border-white/15 bg-[#0B0E14]/70 px-4 py-3 text-sm text-white outline-none ring-[#00D9C0]/50 focus:ring-2"
+              className="rounded-xl border border-[#303B50] bg-[#0F141D] px-4 py-3 text-sm text-white outline-none ring-[#4F8CFF]/55 focus:ring-2"
             >
               {sortOptions.map((option) => (
                 <option key={option.id} value={option.id}>
@@ -371,8 +397,8 @@ function App() {
               onClick={() => setSelectedCategory(category)}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 selectedCategory === category
-                  ? 'border-[#00D9C0] bg-[#00D9C0]/20 text-white'
-                  : 'border-white/15 bg-white/[0.03] text-[#C3C9D8] hover:border-white/40'
+                  ? 'border-[#4F8CFF] bg-[#4F8CFF]/20 text-white'
+                  : 'border-[#313C52] bg-[#121A25] text-[#C3C9D8] hover:border-[#4F8CFF]/50'
               }`}
             >
               {category}
@@ -382,17 +408,24 @@ function App() {
 
         <div className="grid gap-6 lg:grid-cols-[1.45fr_0.55fr]">
           <div className="grid gap-5 md:grid-cols-2">
-            {filteredProducts.map((product) => (
-              <MarketplaceProductCard
-                key={product.id}
-                product={product}
-                inWishlist={wishlist.includes(product.id)}
-                cartQuantity={cart[product.id] ?? 0}
-                onAddToCart={addToCart}
-                onToggleWishlist={toggleWishlist}
-                onSelect={setSelectedProduct}
-              />
-            ))}
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <MarketplaceProductCard
+                  key={product.id}
+                  product={product}
+                  inWishlist={wishlist.includes(product.id)}
+                  cartQuantity={cart[product.id] ?? 0}
+                  onAddToCart={addToCart}
+                  onToggleWishlist={toggleWishlist}
+                  onSelect={setSelectedProduct}
+                />
+              ))
+            ) : (
+              <div className="md:col-span-2 rounded-2xl border border-dashed border-[#303B50] bg-[#121A25] p-8 text-center">
+                <p className="text-lg font-semibold text-white">No products found for this search.</p>
+                <p className="mt-2 text-sm text-[#96A2BC]">Try changing category or clear the search query.</p>
+              </div>
+            )}
           </div>
 
           <aside data-reveal className="sticky top-6 h-fit rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 backdrop-blur-xl lg:top-24">
