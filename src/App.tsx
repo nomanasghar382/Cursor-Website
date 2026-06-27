@@ -6,6 +6,20 @@ import MarketplaceProductCard from './components/ProductCard';
 import { aiPromptSuggestions, productCatalog, productCategories, type ProductItem } from './data/catalog';
 import { featureCards, journeyNodes, metrics, phases } from './data/experience';
 import { usePerformanceMode } from './hooks/usePerformanceMode';
+import {
+  addCartItem,
+  addWishlistItem,
+  createCheckout,
+  createDemoSession,
+  fetchCart,
+  fetchProducts,
+  fetchWishlist,
+  getCurrentUser,
+  getApiBaseUrl,
+  loadDemoCart as loadDemoCartRequest,
+  patchCartItem,
+  removeWishlistItem,
+} from './lib/backendClient';
 
 const MarketplaceScene = lazy(() => import('./components/MarketplaceScene'));
 
@@ -28,6 +42,15 @@ type AssistantInsight = {
   summary: string;
   picks: ProductItem[];
 };
+
+type BackendStatus = 'connecting' | 'connected' | 'fallback';
+
+function toCartRecord(items: Array<{ productId: string; quantity: number }>) {
+  return items.reduce<Record<string, number>>((record, item) => {
+    record[item.productId] = item.quantity;
+    return record;
+  }, {});
+}
 
 function buildAssistantInsight(query: string, products: ProductItem[]): AssistantInsight {
   const lowered = query.toLowerCase();
@@ -72,12 +95,18 @@ function App() {
   const { prefersSmoothMode, isLowSpecDevice, isMobileViewport } = usePerformanceMode();
   const [activePhase, setActivePhase] = useState(0);
   const [qualityMode, setQualityMode] = useState<'smooth' | 'cinematic'>('smooth');
+  const [backendStatus, setBackendStatus] = useState<BackendStatus>('connecting');
+  const [backendMessage, setBackendMessage] = useState('Connecting AI commerce backend...');
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<(typeof productCategories)[number]>('All');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [searchQuery, setSearchQuery] = useState('');
+  const [products, setProducts] = useState<ProductItem[]>(productCatalog);
   const [selectedProduct, setSelectedProduct] = useState<ProductItem>(productCatalog[0]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [cart, setCart] = useState<Record<string, number>>({});
+  const [checkoutMessage, setCheckoutMessage] = useState('');
   const [assistantInput, setAssistantInput] = useState(aiPromptSuggestions[0]);
   const [assistantInsight, setAssistantInsight] = useState<AssistantInsight>(
     buildAssistantInsight(aiPromptSuggestions[0], productCatalog),
@@ -122,16 +151,77 @@ function App() {
     }
   }, [prefersSmoothMode]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const bootstrapBackend = async () => {
+      setBackendStatus('connecting');
+      setBackendMessage('Connecting AI commerce backend...');
+
+      try {
+        let token = window.localStorage.getItem('nexora_token');
+
+        if (token) {
+          await getCurrentUser(token);
+        } else {
+          const demoSession = await createDemoSession();
+          token = demoSession.token;
+          window.localStorage.setItem('nexora_token', token);
+        }
+
+        if (!token) {
+          throw new Error('No token available');
+        }
+
+        const [productsResponse, wishlistResponse, cartResponse] = await Promise.all([
+          fetchProducts(),
+          fetchWishlist(token),
+          fetchCart(token),
+        ]);
+
+        if (cancelled) return;
+        setAuthToken(token);
+        setProducts(productsResponse.products);
+        setWishlist(wishlistResponse.productIds);
+        setCart(toCartRecord(cartResponse.items));
+        setSelectedProduct((current) => {
+          const found = productsResponse.products.find((product) => product.id === current.id);
+          return found ?? productsResponse.products[0] ?? current;
+        });
+        setAssistantInsight(buildAssistantInsight(assistantInput, productsResponse.products));
+        setBackendStatus('connected');
+        setBackendMessage(`Backend connected at ${getApiBaseUrl()}`);
+      } catch {
+        if (cancelled) return;
+        setBackendStatus('fallback');
+        setBackendMessage('Backend unavailable. Running local demo mode.');
+        setAuthToken(null);
+        setProducts(productCatalog);
+        setWishlist([]);
+        setCart({});
+      }
+    };
+
+    bootstrapBackend();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    setAssistantInsight(buildAssistantInsight(assistantInput, products.length ? products : productCatalog));
+  }, [assistantInput, products]);
+
   const filteredProducts = useMemo(() => {
-    let products = [...productCatalog];
+    let result = [...products];
 
     if (selectedCategory !== 'All') {
-      products = products.filter((product) => product.category === selectedCategory);
+      result = result.filter((product) => product.category === selectedCategory);
     }
 
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toLowerCase();
-      products = products.filter(
+      result = result.filter(
         (product) =>
           product.name.toLowerCase().includes(query) ||
           product.description.toLowerCase().includes(query) ||
@@ -141,39 +231,39 @@ function App() {
     }
 
     if (sortBy === 'price-asc') {
-      products.sort((a, b) => a.price - b.price);
+      result.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-desc') {
-      products.sort((a, b) => b.price - a.price);
+      result.sort((a, b) => b.price - a.price);
     } else if (sortBy === 'rating') {
-      products.sort((a, b) => b.rating - a.rating);
+      result.sort((a, b) => b.rating - a.rating);
     } else if (sortBy === 'ai-match') {
-      products.sort((a, b) => b.aiMatch - a.aiMatch);
+      result.sort((a, b) => b.aiMatch - a.aiMatch);
     } else {
-      products.sort((a, b) => b.aiMatch - a.aiMatch || b.rating - a.rating);
+      result.sort((a, b) => b.aiMatch - a.aiMatch || b.rating - a.rating);
     }
 
-    return products;
-  }, [searchQuery, selectedCategory, sortBy]);
+    return result;
+  }, [products, searchQuery, selectedCategory, sortBy]);
 
   const cartItems = useMemo(
     () =>
       Object.entries(cart)
         .filter(([, quantity]) => quantity > 0)
         .map(([productId, quantity]) => {
-          const product = productCatalog.find((item) => item.id === productId);
+          const product = products.find((item) => item.id === productId);
           return product ? { product, quantity } : null;
         })
         .filter((item): item is { product: ProductItem; quantity: number } => item !== null),
-    [cart],
+    [cart, products],
   );
 
   const recommendationStack = useMemo(
     () =>
-      [...productCatalog]
+      [...products]
         .filter((product) => !cart[product.id])
         .sort((a, b) => b.aiMatch - a.aiMatch)
         .slice(0, 4),
-    [cart],
+    [cart, products],
   );
 
   const resultCount = filteredProducts.length;
@@ -188,17 +278,56 @@ function App() {
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 
-  const toggleWishlist = (productId: string) => {
-    setWishlist((current) =>
-      current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId],
-    );
+  const toggleWishlist = async (productId: string) => {
+    if (backendStatus === 'connected' && authToken) {
+      setIsSyncing(true);
+      try {
+        const response = wishlist.includes(productId)
+          ? await removeWishlistItem(authToken, productId)
+          : await addWishlistItem(authToken, productId);
+        setWishlist(response.productIds);
+      } catch {
+        setBackendMessage('Wishlist sync failed. Check backend status.');
+      } finally {
+        setIsSyncing(false);
+      }
+      return;
+    }
+
+    setWishlist((current) => (current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId]));
   };
 
-  const addToCart = (productId: string) => {
+  const addToCart = async (productId: string) => {
+    if (backendStatus === 'connected' && authToken) {
+      setIsSyncing(true);
+      try {
+        const response = await addCartItem(authToken, productId, 1);
+        setCart(toCartRecord(response.items));
+      } catch {
+        setBackendMessage('Cart sync failed. Check backend status.');
+      } finally {
+        setIsSyncing(false);
+      }
+      return;
+    }
+
     setCart((current) => ({ ...current, [productId]: (current[productId] ?? 0) + 1 }));
   };
 
-  const updateCartQuantity = (productId: string, delta: number) => {
+  const updateCartQuantity = async (productId: string, delta: number) => {
+    if (backendStatus === 'connected' && authToken) {
+      setIsSyncing(true);
+      try {
+        const response = await patchCartItem(authToken, productId, delta);
+        setCart(toCartRecord(response.items));
+      } catch {
+        setBackendMessage('Cart update failed. Check backend status.');
+      } finally {
+        setIsSyncing(false);
+      }
+      return;
+    }
+
     setCart((current) => {
       const nextQuantity = Math.max((current[productId] ?? 0) + delta, 0);
       const next = { ...current, [productId]: nextQuantity };
@@ -212,17 +341,55 @@ function App() {
   const runAssistant = (query: string) => {
     if (!query.trim()) return;
     setAssistantInput(query);
-    setAssistantInsight(buildAssistantInsight(query, productCatalog));
+    setAssistantInsight(buildAssistantInsight(query, products.length ? products : productCatalog));
+  };
+
+  const loadDemoCartFromApi = async () => {
+    if (!authToken) return;
+    setIsSyncing(true);
+    try {
+      const response = await loadDemoCartRequest(authToken);
+      setCart(toCartRecord(response.items));
+    } catch {
+      setBackendMessage('Demo cart failed to load from backend.');
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const loadDemoCart = () => {
+    if (backendStatus === 'connected' && authToken) {
+      void loadDemoCartFromApi();
+      return;
+    }
+
     const starterIds = ['nx-watch-pro', 'nx-audio-halo', 'nx-lumen-lamp'];
-    setCart(
-      starterIds.reduce<Record<string, number>>((result, id) => {
-        result[id] = 1;
-        return result;
-      }, {}),
-    );
+    setCart(starterIds.reduce<Record<string, number>>((result, id) => ({ ...result, [id]: 1 }), {}));
+  };
+
+  const confirmCheckout = async () => {
+    if (backendStatus === 'connected' && authToken) {
+      setIsSyncing(true);
+      try {
+        const response = await createCheckout(authToken, {
+          fullName: 'Demo Shopper',
+          email: 'demo@nexora.ai',
+          city: 'Lahore',
+          country: 'Pakistan',
+          cardNumber: '4242424242424242',
+        });
+        setCheckoutMessage(response.message);
+        const cartResponse = await fetchCart(authToken);
+        setCart(toCartRecord(cartResponse.items));
+      } catch {
+        setCheckoutMessage('Checkout failed. Try again.');
+      } finally {
+        setIsSyncing(false);
+      }
+      return;
+    }
+
+    setCheckoutMessage('Frontend demo checkout complete. Connect backend for real order placement.');
   };
 
   return (
@@ -286,6 +453,23 @@ function App() {
           <span className="rounded-full border border-[#2F3A50] bg-[#111722] px-3 py-1">
             How to shop: Select category → type product → Add Cart → Checkout
           </span>
+          <span
+            className={`rounded-full border px-3 py-1 ${
+              backendStatus === 'connected'
+                ? 'border-[#1E5A47] bg-[#12281F] text-[#9DF2CF]'
+                : backendStatus === 'connecting'
+                  ? 'border-[#4A3C1D] bg-[#2B2414] text-[#FFD999]'
+                  : 'border-[#5B3B3B] bg-[#2A1C1C] text-[#FFC2C2]'
+            }`}
+          >
+            API: {backendStatus}
+          </span>
+          {isSyncing && (
+            <span className="rounded-full border border-[#3A4760] bg-[#101722] px-3 py-1 text-[#C4D7FF]">
+              Syncing...
+            </span>
+          )}
+          <span className="rounded-full border border-[#2F3A50] bg-[#111722] px-3 py-1">{backendMessage}</span>
           {(isMobileViewport || isLowSpecDevice) && (
             <span className="rounded-full border border-[#4A3C1D] bg-[#2B2414] px-3 py-1 text-[#FFD999]">
               Smooth mode recommended for this device.
@@ -503,7 +687,7 @@ function App() {
               onClick={loadDemoCart}
               className="mt-4 w-full rounded-xl border border-[#6E56F8]/40 bg-[#6E56F8]/20 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#6E56F8]/30"
             >
-              Load demo cart
+              {backendStatus === 'connected' ? 'Load backend demo cart' : 'Load demo cart'}
             </button>
             <a
               href="#checkout"
@@ -685,12 +869,13 @@ function App() {
             </div>
             <button
               type="button"
+              onClick={() => void confirmCheckout()}
               className="mt-6 rounded-xl border border-[#00D9C0]/45 bg-gradient-to-r from-[#6E56F8]/40 to-[#00D9C0]/35 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
             >
-              Confirm AI-optimized order
+              {backendStatus === 'connected' ? 'Place live order via API' : 'Confirm AI-optimized order'}
             </button>
             <p className="mt-3 text-xs text-[#8F97AB]">
-              Demo checkout frontend only. Node.js backend APIs can be attached in Phase 2.
+              {checkoutMessage || 'Node.js backend order API connected in Phase 1.'}
             </p>
           </div>
 

@@ -1,20 +1,42 @@
-# NEXORA AI Frontend
+# NEXORA AI Commerce Platform (Frontend + Node.js Backend)
 
-Ultra-premium React/Vite frontend for a futuristic AI-powered commerce platform.
+Ultra-premium React/Vite storefront with a Node.js API for auth, products, cart, wishlist, and checkout.
 
 ## Stack
 
-- React + TypeScript + Vite
+- Frontend: React + TypeScript + Vite
 - TailwindCSS
 - Three.js + React Three Fiber + Drei
 - GSAP ScrollTrigger
 - Framer Motion
+- Backend: Node.js + Express + JWT + Zod
 
 ## Local development
 
+### 1) Start backend API
+
 ```bash
+cd backend
 npm install
 npm run dev
+```
+
+Backend runs at `http://localhost:4000` with API routes under `/api`.
+
+### 2) Start frontend
+
+```bash
+cd ..
+npm install
+npm run dev
+```
+
+Frontend runs at `http://localhost:5173` and calls `http://localhost:4000/api` by default.
+
+Optional env override:
+
+```bash
+VITE_API_URL=http://localhost:4000/api
 ```
 
 ## Production build

@@ -6,8 +6,8 @@ type ProductCardProps = {
   product: ProductItem;
   inWishlist: boolean;
   cartQuantity: number;
-  onAddToCart: (id: string) => void;
-  onToggleWishlist: (id: string) => void;
+  onAddToCart: (id: string) => void | Promise<void>;
+  onToggleWishlist: (id: string) => void | Promise<void>;
   onSelect: (product: ProductItem) => void;
 };
 
