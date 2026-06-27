@@ -7,19 +7,25 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 type MarketplaceSceneProps = {
   activePhase: number;
+  qualityMode: 'smooth' | 'cinematic';
+};
+
+type ActivePhaseProps = {
+  activePhase: number;
 };
 
 type SceneContentProps = MarketplaceSceneProps & {
   reducedMotion: boolean;
 };
 
-function MarketplaceScene({ activePhase }: MarketplaceSceneProps) {
+function MarketplaceScene({ activePhase, qualityMode }: MarketplaceSceneProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const isSmoothMode = qualityMode === 'smooth';
 
   return (
     <Canvas
       camera={{ position: [0, 1.4, 7.4], fov: 42 }}
-      dpr={[1, 1.75]}
+      dpr={isSmoothMode ? [1, 1.15] : [1, 1.45]}
       gl={{
         antialias: true,
         alpha: true,
@@ -29,16 +35,18 @@ function MarketplaceScene({ activePhase }: MarketplaceSceneProps) {
       }}
     >
       <Suspense fallback={null}>
-        <SceneContent activePhase={activePhase} reducedMotion={reducedMotion} />
+        <SceneContent activePhase={activePhase} qualityMode={qualityMode} reducedMotion={reducedMotion} />
       </Suspense>
     </Canvas>
   );
 }
 
-function SceneContent({ activePhase, reducedMotion }: SceneContentProps) {
+function SceneContent({ activePhase, qualityMode, reducedMotion }: SceneContentProps) {
   const rig = useRef<THREE.Group>(null);
   const { camera, pointer } = useThree();
   const targetCamera = useMemo(() => new THREE.Vector3(), []);
+  const pointerOffset = useMemo(() => new THREE.Vector3(), []);
+  const isSmoothMode = qualityMode === 'smooth';
   const cameraPositions = useMemo(
     () => [
       new THREE.Vector3(0, 1.4, 7.4),
@@ -49,7 +57,8 @@ function SceneContent({ activePhase, reducedMotion }: SceneContentProps) {
   );
 
   useFrame((_, delta) => {
-    targetCamera.copy(cameraPositions[activePhase]).add(new THREE.Vector3(pointer.x * 0.35, pointer.y * 0.18, 0));
+    pointerOffset.set(pointer.x * 0.35, pointer.y * 0.18, 0);
+    targetCamera.copy(cameraPositions[activePhase]).add(pointerOffset);
     camera.position.lerp(targetCamera, reducedMotion ? 1 : delta * 1.8);
     camera.lookAt(0, 0.2, 0);
 
@@ -75,23 +84,25 @@ function SceneContent({ activePhase, reducedMotion }: SceneContentProps) {
         <RecommendationNetwork activePhase={activePhase} />
         <AiAssistantCore activePhase={activePhase} />
         <CommerceElements activePhase={activePhase} />
-        <ParticleField />
+        <ParticleField qualityMode={qualityMode} />
       </group>
 
-      <Environment resolution={512}>
+      <Environment resolution={isSmoothMode ? 256 : 512}>
         <Lightformer form="ring" intensity={3.5} color="#00D9C0" scale={4} position={[0, 4, -5]} target={[0, 0, 0]} />
         <Lightformer form="rect" intensity={2.4} color="#6E56F8" scale={[6, 3, 1]} position={[-4, 2, 2]} />
         <Lightformer form="circle" intensity={1.6} color="#F5F6FA" scale={2} position={[3, -1, 3]} />
       </Environment>
-      <EffectComposer multisampling={0}>
-        <Bloom luminanceThreshold={0.18} intensity={0.72} mipmapBlur />
-        <Vignette eskil={false} offset={0.18} darkness={0.82} />
-      </EffectComposer>
+      {!isSmoothMode && (
+        <EffectComposer multisampling={0}>
+          <Bloom luminanceThreshold={0.18} intensity={0.72} mipmapBlur />
+          <Vignette eskil={false} offset={0.18} darkness={0.82} />
+        </EffectComposer>
+      )}
     </>
   );
 }
 
-function AiMarketplaceDevice({ activePhase }: MarketplaceSceneProps) {
+function AiMarketplaceDevice({ activePhase }: ActivePhaseProps) {
   const device = useRef<THREE.Group>(null);
 
   useFrame((_, delta) => {
@@ -144,7 +155,7 @@ function AiMarketplaceDevice({ activePhase }: MarketplaceSceneProps) {
   );
 }
 
-function ProductOrbit({ activePhase }: MarketplaceSceneProps) {
+function ProductOrbit({ activePhase }: ActivePhaseProps) {
   const group = useRef<THREE.Group>(null);
 
   useFrame((_, delta) => {
@@ -215,7 +226,7 @@ function SmartWatch({ position }: { position: [number, number, number] }) {
   );
 }
 
-function RecommendationNetwork({ activePhase }: MarketplaceSceneProps) {
+function RecommendationNetwork({ activePhase }: ActivePhaseProps) {
   const points = useMemo(
     () => [
       new THREE.Vector3(-2.2, 0.25, -0.7),
@@ -255,7 +266,7 @@ function ConnectionLine({ start, end, active }: { start: THREE.Vector3; end: THR
   return <primitive object={line}>{<lineBasicMaterial ref={material} color={active ? '#00D9C0' : '#6E56F8'} transparent opacity={0.28} />}</primitive>;
 }
 
-function AiAssistantCore({ activePhase }: MarketplaceSceneProps) {
+function AiAssistantCore({ activePhase }: ActivePhaseProps) {
   const group = useRef<THREE.Group>(null);
 
   useFrame((state) => {
@@ -285,7 +296,7 @@ function AiAssistantCore({ activePhase }: MarketplaceSceneProps) {
   );
 }
 
-function CommerceElements({ activePhase }: MarketplaceSceneProps) {
+function CommerceElements({ activePhase }: ActivePhaseProps) {
   const opacity = activePhase === 2 ? 0.92 : 0.38;
 
   return (
@@ -306,15 +317,16 @@ function CommerceElements({ activePhase }: MarketplaceSceneProps) {
   );
 }
 
-function ParticleField() {
+function ParticleField({ qualityMode }: { qualityMode: 'smooth' | 'cinematic' }) {
   const pointsRef = useRef<THREE.Points>(null);
+  const particleCount = qualityMode === 'smooth' ? 220 : 620;
   const [positions, colors] = useMemo(() => {
-    const positionArray = new Float32Array(620 * 3);
-    const colorArray = new Float32Array(620 * 3);
+    const positionArray = new Float32Array(particleCount * 3);
+    const colorArray = new Float32Array(particleCount * 3);
     const teal = new THREE.Color('#00D9C0');
     const violet = new THREE.Color('#6E56F8');
 
-    for (let index = 0; index < 620; index += 1) {
+    for (let index = 0; index < particleCount; index += 1) {
       const radius = 2.1 + Math.random() * 3.6;
       const angle = Math.random() * Math.PI * 2;
       positionArray[index * 3] = Math.cos(angle) * radius;
@@ -328,7 +340,7 @@ function ParticleField() {
     }
 
     return [positionArray, colorArray];
-  }, []);
+  }, [particleCount]);
 
   useFrame((_, delta) => {
     if (!pointsRef.current) return;

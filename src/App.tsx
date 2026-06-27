@@ -5,6 +5,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import MarketplaceProductCard from './components/ProductCard';
 import { aiPromptSuggestions, productCatalog, productCategories, type ProductItem } from './data/catalog';
 import { featureCards, journeyNodes, metrics, phases } from './data/experience';
+import { usePerformanceMode } from './hooks/usePerformanceMode';
 
 const MarketplaceScene = lazy(() => import('./components/MarketplaceScene'));
 
@@ -68,7 +69,9 @@ function buildAssistantInsight(query: string, products: ProductItem[]): Assistan
 
 function App() {
   const pageRef = useRef<HTMLDivElement>(null);
+  const { prefersSmoothMode, isLowSpecDevice, isMobileViewport } = usePerformanceMode();
   const [activePhase, setActivePhase] = useState(0);
+  const [qualityMode, setQualityMode] = useState<'smooth' | 'cinematic'>('smooth');
   const [selectedCategory, setSelectedCategory] = useState<(typeof productCategories)[number]>('All');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [searchQuery, setSearchQuery] = useState('');
@@ -112,6 +115,12 @@ function App() {
 
     return () => context.revert();
   }, []);
+
+  useEffect(() => {
+    if (prefersSmoothMode) {
+      setQualityMode('smooth');
+    }
+  }, [prefersSmoothMode]);
 
   const filteredProducts = useMemo(() => {
     let products = [...productCatalog];
@@ -263,8 +272,26 @@ function App() {
             <a href="#checkout" className="rounded-xl border border-[#303B50] bg-[#0F141D] px-3 py-2 text-sm text-[#D7DFF1]">
               Cart {cartCount}
             </a>
+            <button
+              type="button"
+              onClick={() => setQualityMode((current) => (current === 'smooth' ? 'cinematic' : 'smooth'))}
+              className="rounded-xl border border-[#3A4760] bg-[#0F141D] px-3 py-2 text-xs font-semibold text-[#BBD0FF]"
+            >
+              Mode: {qualityMode === 'smooth' ? 'Smooth' : 'Cinematic'}
+            </button>
           </div>
         </nav>
+
+        <div className="mx-auto mt-3 flex max-w-7xl flex-wrap items-center gap-2 text-xs text-[#95A3BE]">
+          <span className="rounded-full border border-[#2F3A50] bg-[#111722] px-3 py-1">
+            How to shop: Select category → type product → Add Cart → Checkout
+          </span>
+          {(isMobileViewport || isLowSpecDevice) && (
+            <span className="rounded-full border border-[#4A3C1D] bg-[#2B2414] px-3 py-1 text-[#FFD999]">
+              Smooth mode recommended for this device.
+            </span>
+          )}
+        </div>
 
         <div id="top" className="mx-auto grid min-h-[calc(100vh-96px)] max-w-7xl items-center gap-10 pt-10 lg:grid-cols-[0.92fr_1.08fr]">
           <div className="relative z-20">
@@ -317,7 +344,7 @@ function App() {
 
           <div id="demo" className="relative h-[560px] min-h-[48vh] overflow-hidden rounded-[2rem] border border-[#2A3344] bg-[#0D121A] shadow-[0_40px_120px_rgba(0,0,0,0.45)]">
             <Suspense fallback={<div className="grid h-full place-items-center text-sm text-[#9AA1B2]">Loading NEXORA 3D engine...</div>}>
-              <MarketplaceScene activePhase={activePhase} />
+              <MarketplaceScene activePhase={activePhase} qualityMode={qualityMode} />
             </Suspense>
             <div className="pointer-events-none absolute inset-x-6 bottom-6 rounded-2xl border border-[#2D3647] bg-[#111923]/85 p-4">
               <AnimatePresence mode="wait">

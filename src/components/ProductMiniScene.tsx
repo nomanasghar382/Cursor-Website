@@ -7,13 +7,23 @@ type ProductMiniSceneProps = {
 };
 
 function ProductMiniScene({ category }: ProductMiniSceneProps) {
-  const [primary, secondary, accent] = useMemo(() => {
-    if (category === 'Audio') return ['#7C83FF', '#B9D4FF', '#9B8CFF'];
-    if (category === 'Wearables') return ['#5EEAD4', '#8DCBFF', '#4F8CFF'];
-    if (category === 'Smart Home') return ['#7DD3FC', '#9DB8FF', '#B197FC'];
-    if (category === 'Beauty Tech') return ['#F9A8D4', '#C4B5FD', '#8DA2FF'];
-    if (category === 'Mobility') return ['#34D399', '#60A5FA', '#7EE787'];
-    return ['#A3BFFA', '#67E8F9', '#7C83FF'];
+  const { primary, secondary, accent, variant } = useMemo(() => {
+    if (category === 'Audio') {
+      return { primary: '#7C83FF', secondary: '#B9D4FF', accent: '#9B8CFF', variant: 'audio' as const };
+    }
+    if (category === 'Wearables') {
+      return { primary: '#5EEAD4', secondary: '#8DCBFF', accent: '#4F8CFF', variant: 'wearable' as const };
+    }
+    if (category === 'Smart Home') {
+      return { primary: '#7DD3FC', secondary: '#9DB8FF', accent: '#B197FC', variant: 'home' as const };
+    }
+    if (category === 'Beauty Tech') {
+      return { primary: '#F9A8D4', secondary: '#C4B5FD', accent: '#8DA2FF', variant: 'beauty' as const };
+    }
+    if (category === 'Mobility') {
+      return { primary: '#34D399', secondary: '#60A5FA', accent: '#7EE787', variant: 'mobility' as const };
+    }
+    return { primary: '#A3BFFA', secondary: '#67E8F9', accent: '#7C83FF', variant: 'lifestyle' as const };
   }, [category]);
 
   return (
@@ -24,14 +34,82 @@ function ProductMiniScene({ category }: ProductMiniSceneProps) {
         style={{ transformStyle: 'preserve-3d', perspective: 900 }}
         className="relative h-20 w-20"
       >
-        <span
-          className="absolute inset-0 rounded-[22px] border border-white/20 shadow-[0_14px_50px_rgba(0,0,0,0.35)]"
-          style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, transform: 'translateZ(12px)' }}
-        />
-        <span
-          className="absolute inset-2 rounded-[18px] border border-white/25 opacity-85"
-          style={{ background: `linear-gradient(145deg, ${accent}, ${primary})`, transform: 'translateZ(28px)' }}
-        />
+        {variant === 'audio' && (
+          <>
+            <span
+              className="absolute inset-0 rounded-full border border-white/20 shadow-[0_14px_50px_rgba(0,0,0,0.35)]"
+              style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, transform: 'translateZ(12px)' }}
+            />
+            <span
+              className="absolute inset-[14px] rounded-full border border-white/25 opacity-85"
+              style={{ background: `linear-gradient(145deg, ${accent}, ${primary})`, transform: 'translateZ(28px)' }}
+            />
+          </>
+        )}
+        {variant === 'wearable' && (
+          <>
+            <span
+              className="absolute inset-[8px] rounded-[22px] border border-white/20 shadow-[0_14px_50px_rgba(0,0,0,0.35)]"
+              style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, transform: 'translateZ(12px)' }}
+            />
+            <span
+              className="absolute left-[30px] top-[4px] h-[72px] w-[20px] rounded-full border border-white/25 opacity-85"
+              style={{ background: `linear-gradient(145deg, ${accent}, ${primary})`, transform: 'translateZ(22px)' }}
+            />
+          </>
+        )}
+        {variant === 'home' && (
+          <>
+            <span
+              className="absolute inset-[10px] rounded-[14px] border border-white/20 shadow-[0_14px_50px_rgba(0,0,0,0.35)]"
+              style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, transform: 'translateZ(12px)' }}
+            />
+            <span
+              className="absolute right-[10px] top-[10px] h-[18px] w-[18px] rounded-full border border-white/25 opacity-85"
+              style={{ background: `linear-gradient(145deg, ${accent}, ${primary})`, transform: 'translateZ(24px)' }}
+            />
+          </>
+        )}
+        {variant === 'beauty' && (
+          <>
+            <span
+              className="absolute inset-[6px] rounded-[18px] border border-white/20 shadow-[0_14px_50px_rgba(0,0,0,0.35)]"
+              style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, transform: 'translateZ(12px)' }}
+            />
+            <span
+              className="absolute left-0 top-0 h-full w-full rounded-full border border-white/25 opacity-80"
+              style={{ transform: 'translateZ(26px)' }}
+            />
+          </>
+        )}
+        {variant === 'mobility' && (
+          <>
+            <span
+              className="absolute inset-y-[24px] left-[10px] right-[10px] rounded-full border border-white/20 shadow-[0_14px_50px_rgba(0,0,0,0.35)]"
+              style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, transform: 'translateZ(12px)' }}
+            />
+            <span
+              className="absolute left-[10px] top-[12px] h-[18px] w-[18px] rounded-full border border-white/25 opacity-85"
+              style={{ background: `linear-gradient(145deg, ${accent}, ${primary})`, transform: 'translateZ(24px)' }}
+            />
+            <span
+              className="absolute bottom-[12px] right-[10px] h-[18px] w-[18px] rounded-full border border-white/25 opacity-85"
+              style={{ background: `linear-gradient(145deg, ${accent}, ${primary})`, transform: 'translateZ(24px)' }}
+            />
+          </>
+        )}
+        {variant === 'lifestyle' && (
+          <>
+            <span
+              className="absolute inset-[8px] rounded-[20px] border border-white/20 shadow-[0_14px_50px_rgba(0,0,0,0.35)]"
+              style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, transform: 'translateZ(12px)' }}
+            />
+            <span
+              className="absolute inset-[22px] rounded-[10px] border border-white/25 opacity-85"
+              style={{ background: `linear-gradient(145deg, ${accent}, ${primary})`, transform: 'translateZ(24px)' }}
+            />
+          </>
+        )}
         <span className="absolute inset-0 rounded-[22px] bg-white/10 blur-md" style={{ transform: 'translateZ(-8px)' }} />
       </motion.div>
       <motion.span
