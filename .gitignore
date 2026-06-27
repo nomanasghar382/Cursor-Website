@@ -4,5 +4,9 @@ dist
 *.local
 .env
 backend/data/db.json
+backend/.generated
+backend/dist
+backend/coverage
+coverage
 *.tsbuildinfo
 node_modules/.tmp
