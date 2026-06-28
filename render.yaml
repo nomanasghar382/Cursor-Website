@@ -29,7 +29,7 @@ services:
       - key: RUN_MIGRATIONS
         value: "true"
       - key: RUN_SEED
-        value: "true"
+        value: "false"
       - key: AUTO_FIX_FAILED_MIGRATIONS
         value: "false"
       - key: ENABLE_TEST_PAYMENT_SIMULATION
@@ -56,14 +56,10 @@ services:
         generateValue: true
       - key: BETTER_AUTH_SECRET
         generateValue: true
-      - key: APP_BASE_URL
-        sync: false
-      - key: BETTER_AUTH_URL
-        sync: false
       - key: FRONTEND_URL
-        sync: false
+        value: http://localhost:3000
       - key: WEB_ORIGINS
-        sync: false
+        value: http://localhost:3000
       - key: CLOUDINARY_CLOUD_NAME
         value: demo
       - key: CLOUDINARY_API_KEY
