@@ -9,7 +9,7 @@ if [ -z "${DATABASE_URL:-}" ]; then
 fi
 
 run_migrations() {
-  cd /database && npx prisma migrate deploy
+  (cd /database && npx prisma migrate deploy)
 }
 
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
@@ -17,9 +17,8 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   if ! run_migrations; then
     if [ "${AUTO_FIX_FAILED_MIGRATIONS:-true}" = "true" ]; then
       echo "Recovering from a previous failed migration (local Docker)..."
-      cd /database
-      npx prisma migrate resolve --rolled-back 0001_novaex_initial 2>/dev/null || true
-      if ! npx prisma migrate deploy; then
+      (cd /database && npx prisma migrate resolve --rolled-back 0001_novaex_initial) 2>/dev/null || true
+      if ! run_migrations; then
         echo ""
         echo "ERROR: Database migration still failing."
         echo "Your Postgres volume has a broken migration from earlier attempts."
@@ -47,4 +46,5 @@ if [ "${RUN_SEED:-false}" = "true" ]; then
 fi
 
 echo "Starting NOVAEX API..."
+cd /app
 exec node dist/main.js
