@@ -8,7 +8,8 @@ WORKDIR /database
 COPY database/package*.json ./
 RUN npm ci
 COPY database/ ./
-RUN npx prisma generate
+# prisma generate only needs a placeholder URL at image build time.
+RUN DATABASE_URL="postgresql://build:build@localhost:5432/build?schema=public" npx prisma generate
 
 FROM dependencies AS build
 COPY backend/ ./
