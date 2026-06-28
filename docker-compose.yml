@@ -42,6 +42,7 @@ services:
       REDIS_PORT: 6379
       RUN_MIGRATIONS: "true"
       RUN_SEED: ${RUN_SEED:-false}
+      AUTO_FIX_FAILED_MIGRATIONS: "true"
       ENABLE_TEST_PAYMENT_SIMULATION: ${ENABLE_TEST_PAYMENT_SIMULATION:-true}
     ports:
       - "4000:4000"
