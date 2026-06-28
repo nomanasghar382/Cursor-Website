@@ -26,4 +26,35 @@ describe("validateEnvironment", () => {
     expect(env.MAX_LOGIN_ATTEMPTS).toBe(5);
     expect(env.PASSWORD_EXPIRY_DAYS).toBe(90);
   });
+
+  it("uses PORT when APP_PORT is not provided", () => {
+    const previousPort = process.env.PORT;
+    process.env.PORT = "10000";
+
+    try {
+      const env = validateEnvironment({
+        DATABASE_URL: "postgresql://novaex_user:novaex_password@localhost:5432/novaex?schema=public",
+        JWT_ACCESS_SECRET: "access-secret-with-more-than-twenty-four-characters",
+        JWT_REFRESH_SECRET: "refresh-secret-with-more-than-twenty-four-characters",
+        COOKIE_SECRET: "cookie-secret-with-more-than-twenty-four-characters",
+        BETTER_AUTH_SECRET: "better-auth-secret-with-more-than-twenty-four-characters",
+        BETTER_AUTH_URL: "http://localhost:4000",
+        CLOUDINARY_CLOUD_NAME: "novaex",
+        CLOUDINARY_API_KEY: "key",
+        CLOUDINARY_API_SECRET: "secret",
+        STRIPE_SECRET_KEY: "sk_test",
+        STRIPE_WEBHOOK_SECRET: "whsec",
+        RESEND_API_KEY: "re_test",
+        MAIL_FROM: "NOVAEX <no-reply@novaex.ai>",
+      });
+
+      expect(env.APP_PORT).toBe(10000);
+    } finally {
+      if (previousPort === undefined) {
+        delete process.env.PORT;
+      } else {
+        process.env.PORT = previousPort;
+      }
+    }
+  });
 });

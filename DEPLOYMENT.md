@@ -24,6 +24,8 @@ npm run dev
 
 ## Docker Compose (recommended for staging)
 
+See also **[Render deployment](docs/RENDER.md)** if local Docker is painful — the backend can run on Render's cloud build instead.
+
 ```bash
 cp backend/.env.example backend/.env
 # Edit backend/.env with production secrets

@@ -8,7 +8,15 @@ const csv = z
 export const environmentSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "staging", "production"]).default("development"),
   APP_NAME: z.string().default("NOVAEX API"),
-  APP_PORT: z.coerce.number().int().positive().default(4000),
+  APP_PORT: z.preprocess(
+    (value) => {
+      if (value !== undefined && value !== null && value !== "") {
+        return value;
+      }
+      return process.env.PORT ?? 4000;
+    },
+    z.coerce.number().int().positive(),
+  ),
   APP_GLOBAL_PREFIX: z.string().default("api"),
   APP_VERSION: z.string().default("v1"),
   APP_BASE_URL: z.string().url().default("http://localhost:4000"),
