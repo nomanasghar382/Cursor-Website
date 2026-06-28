@@ -16,7 +16,7 @@
     "test:integration": "jest --config ./test/jest-integration.json --runInBand",
     "prisma:prepare": "node scripts/prepare-prisma-schema.cjs",
     "prisma:generate": "npm run prisma:prepare && prisma generate --schema .generated/prisma/schema.prisma",
-    "migrate:deploy": "prisma migrate deploy --schema ../database/prisma/schema.prisma"
+    "migrate:deploy": "prisma migrate deploy --config ../database/prisma.config.ts --schema ../database/prisma/schema.prisma"
   },
   "dependencies": {
     "@nestjs/bullmq": "^11.0.4",
