@@ -39,6 +39,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RUN_MIGRATIONS: "true"
+      RUN_SEED: ${RUN_SEED:-false}
+      ENABLE_TEST_PAYMENT_SIMULATION: ${ENABLE_TEST_PAYMENT_SIMULATION:-true}
     ports:
       - "4000:4000"
     depends_on:

@@ -21,8 +21,9 @@ COPY --from=build /app/node_modules/prisma ./node_modules/prisma
 COPY --from=build /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY --from=build /app/scripts/docker-entrypoint.sh ./docker-entrypoint.sh
 COPY database/ /database/
-RUN chmod +x ./docker-entrypoint.sh
+# Strip Windows CRLF so Alpine can execute the script (avoids "no such file or directory").
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh && chmod +x ./docker-entrypoint.sh
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
   CMD curl -fsS http://127.0.0.1:4000/api/v1/health/live || exit 1
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "./docker-entrypoint.sh"]
