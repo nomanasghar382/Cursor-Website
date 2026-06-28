@@ -153,6 +153,7 @@ Phir **Redeploy** karein.
 
 | Problem | Fix |
 |---------|-----|
+| **Healthcheck failure** | `RUN_SEED=false` rakho pehli deploy pe; seed baad mein `true` karke redeploy. Logs mein migration/redis error dekho |
 | Migration `vector` extension fail | **pgvector template** use karein, normal Postgres nahi |
 | Redis `ENOTFOUND redis.railway.internal` | `REDIS_URL=${{Redis.REDIS_URL}}` set karein (code `family=0` handle karta hai) |
 | Login "Failed to fetch" | Vercel `NEXT_PUBLIC_API_URL` + Railway `WEB_ORIGINS` check karein |

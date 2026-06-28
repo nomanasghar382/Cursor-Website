@@ -39,17 +39,22 @@ function withRedisFamily(redisUrl: string): string {
 }
 
 export function createRedisClientOptions(settings: RedisConnectionSettings): RedisOptions {
+  const baseOptions: RedisOptions = {
+    maxRetriesPerRequest: 3,
+    enableReadyCheck: true,
+    lazyConnect: true,
+    connectTimeout: 15_000,
+    family: 0,
+  };
+
   if (settings.url) {
     const parsed = new URL(settings.url);
     const options: RedisOptions = {
+      ...baseOptions,
       host: parsed.hostname,
       port: Number(parsed.port || 6379),
       password: parsed.password || undefined,
       username: parsed.username || undefined,
-      family: 0,
-      maxRetriesPerRequest: 3,
-      enableReadyCheck: true,
-      lazyConnect: true,
     };
 
     if (settings.url.startsWith("rediss://")) {
@@ -60,12 +65,9 @@ export function createRedisClientOptions(settings: RedisConnectionSettings): Red
   }
 
   return {
+    ...baseOptions,
     host: settings.host,
     port: settings.port,
     password: settings.password,
-    family: settings.host.includes(".railway.internal") ? 0 : undefined,
-    maxRetriesPerRequest: 3,
-    enableReadyCheck: true,
-    lazyConnect: true,
   };
 }

@@ -29,9 +29,13 @@ COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/node_modules/prisma ./node_modules/prisma
 COPY --from=build /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY --from=build /app/scripts/docker-entrypoint.sh ./docker-entrypoint.sh
-COPY --from=build /database /database
+COPY database/package*.json /database/
+RUN cd /database && npm ci
+COPY --from=build /database/prisma /database/prisma
+COPY --from=build /database/prisma.config.ts /database/prisma.config.ts
 RUN sed -i 's/\r$//' ./docker-entrypoint.sh && chmod +x ./docker-entrypoint.sh
+ENV HOST=0.0.0.0
 EXPOSE 4000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-  CMD curl -fsS http://127.0.0.1:4000/api/v1/health/live || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=5 \
+  CMD /bin/sh -c 'curl -fsS "http://127.0.0.1:${PORT:-4000}/api/v1/health/live" || exit 1'
 ENTRYPOINT ["/bin/sh", "./docker-entrypoint.sh"]
