@@ -4,14 +4,16 @@ import { useEffect, useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useHomeStore } from "@/stores/home-store";
+import { useAuthStore } from "@/stores/auth-store";
+import { useCommerceStore } from "@/stores/commerce-store";
 import type { ProductDetail } from "@/types/catalog";
 import { formatCurrency } from "@/lib/utils";
 
 export function ProductStickyCta({ product }: { product: ProductDetail }) {
   const [visible, setVisible] = useState(false);
   const prefersReducedMotion = useReducedMotion();
-  const addToCart = useHomeStore((state) => state.addToCart);
+  const token = useAuthStore((state) => state.accessToken);
+  const addToCart = useCommerceStore((state) => state.addToCart);
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 520);
@@ -36,7 +38,13 @@ export function ProductStickyCta({ product }: { product: ProductDetail }) {
       </div>
       <Button
         variant="gradient"
-        onClick={() => addToCart(product.id)}
+        onClick={() =>
+          void addToCart({
+            token,
+            variantId: product.variants[0]?.id ?? product.id,
+            productId: product.id,
+          })
+        }
         disabled={product.stock <= 0}
       >
         <ShoppingCart className="h-4 w-4" />

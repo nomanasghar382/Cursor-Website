@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useCommerceStore } from "@/stores/commerce-store";
 
 type HomeStore = {
   wishlist: string[];
@@ -19,26 +20,25 @@ export const useHomeStore = create<HomeStore>()(
       wishlist: [],
       cart: {},
       compareList: [],
-      toggleWishlist: (productId) =>
-        set((state) => ({
-          wishlist: state.wishlist.includes(productId)
-            ? state.wishlist.filter((id) => id !== productId)
-            : [...state.wishlist, productId],
-        })),
-      addToCart: (productId, quantity = 1) =>
+      toggleWishlist: (productId) => {
+        void useCommerceStore.getState().toggleWishlist({ productId });
+        const lists = useCommerceStore.getState().wishlists;
+        const ids = lists.flatMap((list) => list.items.map((item) => item.productId));
+        set({ wishlist: ids });
+      },
+      addToCart: (productId, quantity = 1) => {
         set((state) => ({
           cart: {
             ...state.cart,
             [productId]: (state.cart[productId] ?? 0) + quantity,
           },
-        })),
-      toggleCompare: (productId) =>
-        set((state) => ({
-          compareList: state.compareList.includes(productId)
-            ? state.compareList.filter((id) => id !== productId)
-            : [...state.compareList, productId].slice(-3),
-        })),
-      cartCount: () => Object.values(get().cart).reduce((sum, qty) => sum + qty, 0),
+        }));
+      },
+      toggleCompare: (productId) => {
+        useCommerceStore.getState().toggleCompare(productId);
+        set({ compareList: useCommerceStore.getState().compareList });
+      },
+      cartCount: () => useCommerceStore.getState().cartCount(),
     }),
     { name: "novaex-home-commerce" },
   ),

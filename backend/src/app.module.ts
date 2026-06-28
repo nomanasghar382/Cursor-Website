@@ -25,6 +25,11 @@ import { AuthorizationModule } from "./modules/authorization/authorization.modul
 import { SessionModule } from "./modules/session/session.module";
 import { AuthContextMiddleware } from "./common/middlewares/auth-context.middleware";
 import { ProductsModule } from "./modules/products/products.module";
+import { CartModule } from "./modules/cart/cart.module";
+import { WishlistModule } from "./modules/wishlist/wishlist.module";
+import { CheckoutModule } from "./modules/checkout/checkout.module";
+import { OrdersModule } from "./modules/orders/orders.module";
+import { CouponsModule } from "./modules/coupons/coupons.module";
 import { AuditModule } from "./modules/audit/audit.module";
 import { StorageModule } from "./modules/storage/storage.module";
 import { MailModule } from "./modules/mail/mail.module";
@@ -67,6 +72,11 @@ import { EmailsModule } from "./emails/emails.module";
     SessionModule,
     AuthorizationModule,
     ProductsModule,
+    CartModule,
+    WishlistModule,
+    CouponsModule,
+    CheckoutModule,
+    OrdersModule,
     AuditModule,
     StorageModule,
     MailModule,

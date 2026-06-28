@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/stores/auth-store";
-import { useHomeStore } from "@/stores/home-store";
+import { useCommerceStore } from "@/stores/commerce-store";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
@@ -23,9 +23,10 @@ export function SiteHeader() {
   const scrollY = useScrollPosition();
   const { theme, setTheme } = useTheme();
   const user = useAuthStore((state) => state.user);
-  const wishlist = useHomeStore((state) => state.wishlist);
-  const cart = useHomeStore((state) => state.cart);
-  const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+  const wishlists = useCommerceStore((state) => state.wishlists);
+  const cartCount = useCommerceStore((state) => state.cartCount());
+  const setDrawerOpen = useCommerceStore((state) => state.setDrawerOpen);
+  const wishlistCount = wishlists.reduce((sum, list) => sum + list.itemCount, 0);
   const setCommandPaletteOpen = useUiStore((state) => state.setCommandPaletteOpen);
   const setMobileNavOpen = useUiStore((state) => state.setMobileNavOpen);
 
@@ -96,24 +97,28 @@ export function SiteHeader() {
             <Search className="h-4 w-4" />
           </Button>
           <Button variant="glass" size="icon" className="relative" aria-label="Wishlist" asChild>
-            <Link href="/products">
+            <Link href="/wishlist">
               <Heart className="h-4 w-4" />
-              {wishlist.length > 0 ? (
+              {wishlistCount > 0 ? (
                 <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
-                  {wishlist.length}
+                  {wishlistCount}
                 </span>
               ) : null}
             </Link>
           </Button>
-          <Button variant="glass" size="icon" className="relative" aria-label="Cart" asChild>
-            <Link href="/products">
-              <ShoppingCart className="h-4 w-4" />
-              {cartCount > 0 ? (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
-                  {cartCount}
-                </span>
-              ) : null}
-            </Link>
+          <Button
+            variant="glass"
+            size="icon"
+            className="relative"
+            aria-label="Cart"
+            onClick={() => setDrawerOpen(true)}
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {cartCount > 0 ? (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
+                {cartCount}
+              </span>
+            ) : null}
           </Button>
           <Button
             variant="glass"
