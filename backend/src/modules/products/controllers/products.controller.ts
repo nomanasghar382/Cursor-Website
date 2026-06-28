@@ -1,4 +1,4 @@
-import { Controller, Get, Query, VERSION_NEUTRAL } from "@nestjs/common";
+import { Controller, Get, Param, Query, VERSION_NEUTRAL } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Public } from "../../../common/decorators/public.decorator";
 import { ProductQueryDto } from "../dto/product-query.dto";
@@ -13,5 +13,11 @@ export class ProductsController {
   @Get()
   list(@Query() query: ProductQueryDto) {
     return this.productsService.list(query);
+  }
+
+  @Public()
+  @Get(":id")
+  getById(@Param("id") id: string) {
+    return this.productsService.getById(id);
   }
 }

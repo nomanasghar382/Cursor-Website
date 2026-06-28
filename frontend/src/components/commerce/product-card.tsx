@@ -16,6 +16,10 @@ export function ProductCardView({ product }: { product: ProductCard }) {
             product.gradient,
           )}
         >
+          {product.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={product.imageUrl} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
+          ) : null}
           <div className="absolute inset-0 bg-black/20" />
           <div className="relative space-y-2">
             <Badge variant="accent">{product.badge}</Badge>
