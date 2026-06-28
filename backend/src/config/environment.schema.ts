@@ -12,7 +12,7 @@ export const environmentSchema = z.object({
   APP_GLOBAL_PREFIX: z.string().default("api"),
   APP_VERSION: z.string().default("v1"),
   APP_BASE_URL: z.string().url().default("http://localhost:4000"),
-  WEB_ORIGINS: csv.default(["http://localhost:5173", "http://127.0.0.1:5173"]),
+  WEB_ORIGINS: csv.default(["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173"]),
   DATABASE_URL: z.string().url(),
   REDIS_HOST: z.string().default("localhost"),
   REDIS_PORT: z.coerce.number().int().positive().default(6379),
