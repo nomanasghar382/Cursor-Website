@@ -49,6 +49,13 @@ jobs:
       - name: Install database dependencies
         working-directory: database
         run: npm ci
+      - name: Migrate and seed database
+        working-directory: database
+        run: |
+          npm run migrate:deploy
+          npm run seed
+        env:
+          DATABASE_URL: postgresql://novaex_user:novaex_password@localhost:5432/novaex?schema=public
       - name: Validate Prisma schema
         working-directory: database
         run: npm run validate

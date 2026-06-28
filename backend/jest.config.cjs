@@ -5,8 +5,21 @@ module.exports = {
   transform: {
     "^.+\\.(t|j)s$": ["ts-jest", { tsconfig: "tsconfig.json" }],
   },
-  collectCoverageFrom: ["src/**/*.(t|j)s"],
+  collectCoverageFrom: [
+    "src/**/*.(t|j)s",
+    "!src/**/*.module.ts",
+    "!src/main.ts",
+    "!src/**/index.ts",
+  ],
   coverageDirectory: "coverage",
+  coverageThreshold: {
+    global: {
+      branches: 5,
+      functions: 6,
+      lines: 10,
+      statements: 11,
+    },
+  },
   testEnvironment: "node",
   transformIgnorePatterns: ["/node_modules/(?!(@scure|@noble|otplib|@otplib)/)"],
   moduleNameMapper: {
