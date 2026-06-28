@@ -11,6 +11,7 @@ export class CookieAuthService {
 
   setAuthCookies(response: Response, accessToken: string, refreshToken: string, rememberMe = false): void {
     const secure = this.configService.get<string>("app.nodeEnv") === "production";
+    const sameSite = secure ? "none" : "strict";
     const accessMaxAge = this.durationToMs(this.configService.getOrThrow<string>("auth.accessExpiresIn"));
     const refreshMaxAge = this.durationToMs(
       rememberMe
@@ -21,14 +22,14 @@ export class CookieAuthService {
     response.cookie(ACCESS_TOKEN_COOKIE, accessToken, {
       httpOnly: true,
       secure,
-      sameSite: "strict",
+      sameSite,
       maxAge: accessMaxAge,
       signed: true,
     });
     response.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
       httpOnly: true,
       secure,
-      sameSite: "strict",
+      sameSite,
       maxAge: refreshMaxAge,
       signed: true,
       path: REFRESH_COOKIE_PATH,

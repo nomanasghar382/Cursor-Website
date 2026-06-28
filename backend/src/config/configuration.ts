@@ -1,6 +1,9 @@
 import { EnvironmentVariables } from "./environment.schema";
+import { mergeWebOrigins } from "./cors.util";
 
 export default function configuration(env: EnvironmentVariables) {
+  const webOrigins = mergeWebOrigins(env.WEB_ORIGINS, env.FRONTEND_URL);
+
   return {
     app: {
       name: env.APP_NAME,
@@ -9,8 +12,8 @@ export default function configuration(env: EnvironmentVariables) {
       globalPrefix: env.APP_GLOBAL_PREFIX,
       version: env.APP_VERSION,
       baseUrl: env.APP_BASE_URL,
-      webOrigins: env.WEB_ORIGINS,
-      frontendUrl: env.FRONTEND_URL ?? env.WEB_ORIGINS[0] ?? "http://localhost:3000",
+      webOrigins,
+      frontendUrl: env.FRONTEND_URL ?? webOrigins[0] ?? "http://localhost:3000",
       logLevel: env.LOG_LEVEL,
     },
     database: {

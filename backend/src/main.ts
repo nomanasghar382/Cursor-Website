@@ -7,6 +7,7 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { AppModule } from "./app.module";
+import { isAllowedCorsOrigin } from "./config/cors.util";
 
 function resolveLogLevels(level: string): LogLevel[] {
   const map: Record<string, LogLevel[]> = {
@@ -34,8 +35,15 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: "1",
   });
+  const webOrigins = configService.getOrThrow<string[]>("app.webOrigins");
   app.enableCors({
-    origin: configService.getOrThrow<string[]>("app.webOrigins"),
+    origin: (origin, callback) => {
+      if (isAllowedCorsOrigin(origin, webOrigins)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`Origin ${origin ?? "unknown"} is not allowed by CORS`), false);
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Authorization", "Content-Type", "x-request-id", "x-csrf-token"],
