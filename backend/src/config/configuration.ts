@@ -1,5 +1,6 @@
 import { EnvironmentVariables } from "./environment.schema";
 import { mergeWebOrigins } from "./cors.util";
+import { resolveRedisSettings } from "./redis-connection.util";
 
 export default function configuration(env: EnvironmentVariables) {
   const webOrigins = mergeWebOrigins(env.WEB_ORIGINS, env.FRONTEND_URL);
@@ -19,11 +20,7 @@ export default function configuration(env: EnvironmentVariables) {
     database: {
       url: env.DATABASE_URL,
     },
-    redis: {
-      host: env.REDIS_HOST,
-      port: env.REDIS_PORT,
-      password: env.REDIS_PASSWORD || undefined,
-    },
+    redis: resolveRedisSettings(env),
     auth: {
       jwtAccessSecret: env.JWT_ACCESS_SECRET,
       jwtRefreshSecret: env.JWT_REFRESH_SECRET,

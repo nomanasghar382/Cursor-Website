@@ -1,0 +1,29 @@
+# NOVAEX backend on Railway (Docker)
+# Dashboard: New Project -> Deploy from GitHub -> select this repo
+# Also add: Postgres (pgvector template) + Redis from Railway dashboard
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+buildContext = "."
+
+[deploy]
+healthcheckPath = "/api/v1/health/live"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[deploy.envs]
+NODE_ENV = "production"
+RUN_MIGRATIONS = "true"
+RUN_SEED = "false"
+AUTO_FIX_FAILED_MIGRATIONS = "false"
+ENABLE_TEST_PAYMENT_SIMULATION = "true"
+CLOUDINARY_CLOUD_NAME = "demo"
+CLOUDINARY_API_KEY = "demo-key"
+CLOUDINARY_API_SECRET = "demo-secret"
+STRIPE_SECRET_KEY = "sk_test_railway_placeholder"
+STRIPE_WEBHOOK_SECRET = "whsec_railway_placeholder"
+STRIPE_PUBLISHABLE_KEY = "pk_test_railway_placeholder"
+RESEND_API_KEY = "re_railway_placeholder"
+MAIL_FROM = "NOVAEX <no-reply@novaex.ai>"

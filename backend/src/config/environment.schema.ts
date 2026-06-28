@@ -1,14 +1,10 @@
 import { z } from "zod";
+import { platformExternalUrl } from "./platform-url.util";
 
 const csv = z
   .string()
   .min(1)
   .transform((value) => value.split(",").map((item) => item.trim()).filter(Boolean));
-
-function renderExternalUrl(): string | undefined {
-  const url = process.env.RENDER_EXTERNAL_URL;
-  return url && url.length > 0 ? url : undefined;
-}
 
 export const environmentSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "staging", "production"]).default("development"),
@@ -25,12 +21,13 @@ export const environmentSchema = z.object({
   APP_GLOBAL_PREFIX: z.string().default("api"),
   APP_VERSION: z.string().default("v1"),
   APP_BASE_URL: z.preprocess(
-    (value) => value || renderExternalUrl() || "http://localhost:4000",
+    (value) => value || platformExternalUrl() || "http://localhost:4000",
     z.string().url(),
   ),
   WEB_ORIGINS: csv.default(["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173"]),
   FRONTEND_URL: z.string().url().optional(),
   DATABASE_URL: z.string().url(),
+  REDIS_URL: z.string().url().optional(),
   REDIS_HOST: z.string().default("localhost"),
   REDIS_PORT: z.coerce.number().int().positive().default(6379),
   REDIS_PASSWORD: z.string().optional(),
@@ -43,7 +40,7 @@ export const environmentSchema = z.object({
   CSRF_ENABLED: z.coerce.boolean().default(false),
   BETTER_AUTH_SECRET: z.string().min(24),
   BETTER_AUTH_URL: z.preprocess(
-    (value) => value || renderExternalUrl() || "http://localhost:4000",
+    (value) => value || platformExternalUrl() || "http://localhost:4000",
     z.string().url(),
   ),
   MFA_ISSUER: z.string().default("NOVAEX"),

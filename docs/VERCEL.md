@@ -31,9 +31,9 @@
 
 | Name | Value |
 |------|--------|
-| `NEXT_PUBLIC_API_URL` | `https://YOUR-RENDER-BACKEND.onrender.com/api/v1` |
+| `NEXT_PUBLIC_API_URL` | `https://YOUR-BACKEND.up.railway.app/api/v1` |
 
-> `YOUR-RENDER-BACKEND` ki jagah apni Render backend URL likhein (bina `/` ke end pe).
+> Backend URL apne host se replace karein — **Railway** (`*.up.railway.app`) ya **Render** (`*.onrender.com`). End pe `/` mat lagayein.
 
 **`NEXT_PUBLIC_APP_URL`** abhi skip kar sakte hain — Vercel URL auto detect ho jati hai.
 
@@ -52,18 +52,20 @@ Ye hi aapki **FRONTEND_URL** hai.
 
 ---
 
-## Step 5 — Render backend update karein
+## Step 5 — Backend (Railway ya Render) update karein
 
-Render backend → **Environment** → ye values update karein:
+Backend service → **Environment / Variables** → ye values update karein:
 
 | Key | Value |
 |-----|--------|
 | `FRONTEND_URL` | `https://cursor-website.vercel.app` |
 | `WEB_ORIGINS` | `https://cursor-website.vercel.app,http://localhost:3000` |
-| `APP_BASE_URL` | `https://your-backend.onrender.com` |
+| `APP_BASE_URL` | `https://your-backend.up.railway.app` |
 | `BETTER_AUTH_URL` | same backend URL |
 
-Phir backend pe **Manual Deploy** → **Deploy latest commit**.
+Railway guide: [`docs/RAILWAY.md`](./RAILWAY.md)
+
+Phir backend pe redeploy karein.
 
 ---
 
@@ -90,7 +92,7 @@ Ya `main` pe merge hone ka wait karein.
 | Error | Fix |
 |-------|-----|
 | Build fail — wrong folder | Root Directory = `frontend` set karein |
-| API calls fail / CORS | Render pe `WEB_ORIGINS` mein Vercel URL add karein |
+| API calls fail / CORS | Backend pe `WEB_ORIGINS` mein Vercel URL add karein |
 | Login nahi hota | Backend `RUN_SEED=true` se deploy ho + `NEXT_PUBLIC_API_URL` sahi ho |
 
 ---
