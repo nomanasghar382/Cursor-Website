@@ -33,6 +33,7 @@ import { CustomerModule } from "./modules/customer/customer.module";
 import { AdminModule } from "./modules/admin/admin.module";
 import { VendorModule } from "./modules/vendor/vendor.module";
 import { AiModule } from "./modules/ai/ai.module";
+import { FulfillmentModule } from "./modules/fulfillment/fulfillment.module";
 import { CouponsModule } from "./modules/coupons/coupons.module";
 import { AuditModule } from "./modules/audit/audit.module";
 import { StorageModule } from "./modules/storage/storage.module";
@@ -85,6 +86,7 @@ import { EmailsModule } from "./emails/emails.module";
     AdminModule,
     VendorModule,
     AiModule,
+    FulfillmentModule,
     AuditModule,
     StorageModule,
     MailModule,

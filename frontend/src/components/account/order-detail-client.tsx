@@ -2,26 +2,32 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Download, RotateCcw, Star, Undo2, XCircle } from "lucide-react";
+import { Download, CreditCard, RotateCcw, Star, Undo2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Timeline } from "@/components/common/timeline";
+import { InvoiceReceiptCard } from "@/components/fulfillment/invoice-receipt-card";
+import { OrderStatusBadge } from "@/components/fulfillment/order-status-badge";
+import { OrderTrackingPanel } from "@/components/fulfillment/order-tracking-panel";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { ordersApi } from "@/lib/api/orders";
 import type { OrderSummary } from "@/types/commerce";
+import type { InvoicePayload, OrderTracking } from "@/types/fulfillment";
 import { formatCurrency } from "@/lib/utils";
 
 export function OrderDetailClient({ orderId }: { orderId: string }) {
   const { token, ready } = useRequireAuth(`/login?next=/account/orders/${orderId}`);
   const [order, setOrder] = useState<OrderSummary | null>(null);
+  const [tracking, setTracking] = useState<OrderTracking | null>(null);
+  const [invoice, setInvoice] = useState<InvoicePayload | null>(null);
   const [returnOpen, setReturnOpen] = useState(false);
+  const [refundOpen, setRefundOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [returnReason, setReturnReason] = useState("");
+  const [refundReason, setRefundReason] = useState("");
   const [reviewItemId, setReviewItemId] = useState<string | null>(null);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewTitle, setReviewTitle] = useState("");
@@ -29,8 +35,12 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
 
   const loadOrder = async () => {
     if (!token) return;
-    const result = await ordersApi.getById(token, orderId);
-    setOrder(result.order);
+    const [detail, trackResult] = await Promise.all([
+      ordersApi.getById(token, orderId),
+      ordersApi.track(token, orderId).catch(() => null),
+    ]);
+    setOrder(detail.order);
+    setTracking(trackResult?.tracking as OrderTracking | null);
   };
 
   useEffect(() => {
@@ -54,6 +64,20 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
     await loadOrder();
   };
 
+  const requestRefund = async () => {
+    if (!token) return;
+    await ordersApi.requestRefund(token, orderId, refundReason);
+    setRefundOpen(false);
+    setRefundReason("");
+    toast.success("Refund request submitted");
+  };
+
+  const retryPayment = async () => {
+    if (!token) return;
+    const result = await ordersApi.retryPayment(token, orderId);
+    toast.success(`Payment retry ready (${result.payment.status})`);
+  };
+
   const reorder = async () => {
     if (!token) return;
     await ordersApi.reorder(token, orderId);
@@ -63,7 +87,8 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
   const downloadInvoice = async () => {
     if (!token) return;
     const result = await ordersApi.getInvoice(token, orderId);
-    const blob = new Blob([JSON.stringify(result.invoice, null, 2)], { type: "application/json" });
+    setInvoice(result.invoice as InvoicePayload);
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -90,15 +115,16 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
 
   const canCancel = ["PENDING_PAYMENT", "CONFIRMED"].includes(order.status);
   const canReturn = order.status === "DELIVERED";
+  const canRetryPayment = order.status === "PENDING_PAYMENT";
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-4xl font-semibold">{order.orderNumber}</h1>
-          <Badge className="mt-2" variant="secondary">
-            {order.status}
-          </Badge>
+          <div className="mt-2">
+            <OrderStatusBadge status={order.status} />
+          </div>
         </div>
         <p className="font-display text-3xl font-semibold">{formatCurrency(order.grandTotal)}</p>
       </div>
@@ -116,6 +142,16 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
             Request return
           </Button>
         ) : null}
+        <Button variant="outline" onClick={() => setRefundOpen(true)}>
+          <CreditCard className="mr-2 h-4 w-4" />
+          Refund request
+        </Button>
+        {canRetryPayment ? (
+          <Button variant="outline" onClick={() => void retryPayment()}>
+            <CreditCard className="mr-2 h-4 w-4" />
+            Retry payment
+          </Button>
+        ) : null}
         <Button variant="outline" onClick={() => void reorder()}>
           <RotateCcw className="mr-2 h-4 w-4" />
           Reorder
@@ -126,16 +162,9 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
         </Button>
       </div>
 
-      {order.timeline?.length ? (
-        <Timeline
-          items={order.timeline.map((step) => ({
-            title: step.label,
-            description: step.completed ? "Completed" : step.current ? "In progress" : "Upcoming",
-            timestamp: step.current ? "Current step" : step.completed ? "Done" : "Pending",
-            active: step.current,
-          }))}
-        />
-      ) : null}
+      {tracking ? <OrderTrackingPanel tracking={tracking} /> : null}
+
+      {invoice ? <InvoiceReceiptCard invoice={invoice} /> : null}
 
       <div className="space-y-3 rounded-[1.5rem] border border-border/60 p-5">
         {order.items?.map((item) => (
@@ -173,17 +202,23 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
             <DialogTitle>Request return</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="return-reason">Reason</Label>
-              <Textarea
-                id="return-reason"
-                value={returnReason}
-                onChange={(event) => setReturnReason(event.target.value)}
-                placeholder="Describe the issue with your order"
-              />
-            </div>
+            <Textarea value={returnReason} onChange={(e) => setReturnReason(e.target.value)} placeholder="Describe the issue" />
             <Button variant="gradient" onClick={() => void requestReturn()}>
               Submit return request
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={refundOpen} onOpenChange={setRefundOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request refund</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea value={refundReason} onChange={(e) => setRefundReason(e.target.value)} placeholder="Why do you need a refund?" />
+            <Button variant="gradient" onClick={() => void requestRefund()}>
+              Submit refund request
             </Button>
           </div>
         </DialogContent>
@@ -197,23 +232,10 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="review-rating">Rating (1-5)</Label>
-              <Input
-                id="review-rating"
-                type="number"
-                min={1}
-                max={5}
-                value={reviewRating}
-                onChange={(event) => setReviewRating(Number(event.target.value))}
-              />
+              <Input id="review-rating" type="number" min={1} max={5} value={reviewRating} onChange={(e) => setReviewRating(Number(e.target.value))} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="review-title">Title</Label>
-              <Input id="review-title" value={reviewTitle} onChange={(event) => setReviewTitle(event.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="review-body">Review</Label>
-              <Textarea id="review-body" value={reviewBody} onChange={(event) => setReviewBody(event.target.value)} />
-            </div>
+            <Input value={reviewTitle} onChange={(e) => setReviewTitle(e.target.value)} placeholder="Title" />
+            <Textarea value={reviewBody} onChange={(e) => setReviewBody(e.target.value)} placeholder="Review" />
             <Button variant="gradient" onClick={() => void submitReview()}>
               Submit review
             </Button>

@@ -121,10 +121,10 @@ export type OrderSummary = {
   orderNumber: string;
   status: string;
   currencyCode: string;
-  subtotal: number;
-  taxTotal: number;
-  shippingTotal: number;
-  discountTotal: number;
+  subtotal?: number;
+  taxTotal?: number;
+  shippingTotal?: number;
+  discountTotal?: number;
   grandTotal: number;
   itemCount?: number;
   createdAt?: string;
@@ -133,10 +133,25 @@ export type OrderSummary = {
   items?: Array<{
     id: string;
     productName: string;
-    sku?: string;
+    sku?: string | null;
     quantity: number;
     unitPrice: number;
     lineTotal: number;
   }>;
   timeline?: Array<{ key: string; label: string; completed: boolean; current: boolean }>;
+  payments?: Array<{ id: string; gateway: string; status: string; amount: number; clientSecret?: string | null }>;
+  shipments?: Array<{
+    id: string;
+    carrier: string;
+    status: string;
+    trackingNumber?: string | null;
+    method: string;
+    events?: Array<{ id: string; status: string; description?: string | null; occurredAt: string }>;
+  }>;
+  shippingAddress?: Record<string, string>;
+  billingAddress?: Record<string, string>;
+  deliveryInstructions?: string;
+  notes?: Array<{ id: string; note: string; createdAt: string; author?: string }>;
+  returns?: Array<{ id: string; status: string; reason: string; requestedAt: string }>;
+  coupon?: string;
 };

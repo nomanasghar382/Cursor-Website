@@ -26,6 +26,21 @@ export class StripeService {
     });
   }
 
+  createRefund(input: { paymentIntentId: string; amountCents?: number; reason?: string }) {
+    return this.client.refunds.create({
+      payment_intent: input.paymentIntentId,
+      ...(input.amountCents ? { amount: input.amountCents } : {}),
+      metadata: {
+        platform: "novaex",
+        ...(input.reason ? { reason: input.reason } : {}),
+      },
+    });
+  }
+
+  retrievePaymentIntent(paymentIntentId: string) {
+    return this.client.paymentIntents.retrieve(paymentIntentId);
+  }
+
   constructWebhookEvent(payload: Buffer | string, signature: string) {
     return this.client.webhooks.constructEvent(payload, signature, this.configService.getOrThrow<string>("stripe.webhookSecret"));
   }
