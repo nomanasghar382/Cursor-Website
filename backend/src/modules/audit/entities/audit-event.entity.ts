@@ -5,5 +5,6 @@ export interface AuditEvent {
   entityId?: string;
   requestId?: string;
   ipAddress?: string;
-  changes?: Record<string, unknown>;
+  before?: Record<string, unknown>;
+  after?: Record<string, unknown>;
 }

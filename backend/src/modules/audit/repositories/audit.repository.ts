@@ -15,7 +15,8 @@ export class AuditRepository {
         entityType: event.entityType,
         entityId: event.entityId,
         ipAddress: event.ipAddress,
-        changes: (event.changes ?? {}) as Prisma.InputJsonObject,
+        before: (event.before ?? undefined) as Prisma.InputJsonValue | undefined,
+        after: (event.after ?? undefined) as Prisma.InputJsonValue | undefined,
         metadata: {
           requestId: event.requestId,
         },

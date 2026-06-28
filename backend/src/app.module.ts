@@ -21,6 +21,9 @@ import { QueueModule } from "./queues/queue.module";
 import { LogsModule } from "./logs/logs.module";
 import { SecurityModule } from "./modules/security/security.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { AuthorizationModule } from "./modules/authorization/authorization.module";
+import { SessionModule } from "./modules/session/session.module";
+import { AuthContextMiddleware } from "./common/middlewares/auth-context.middleware";
 import { ProductsModule } from "./modules/products/products.module";
 import { AuditModule } from "./modules/audit/audit.module";
 import { StorageModule } from "./modules/storage/storage.module";
@@ -61,6 +64,8 @@ import { EmailsModule } from "./emails/emails.module";
     QueueModule,
     SecurityModule,
     AuthModule,
+    SessionModule,
+    AuthorizationModule,
     ProductsModule,
     AuditModule,
     StorageModule,
@@ -87,6 +92,6 @@ import { EmailsModule } from "./emails/emails.module";
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(RequestContextMiddleware, CsrfMiddleware).forRoutes("*");
+    consumer.apply(RequestContextMiddleware, AuthContextMiddleware, CsrfMiddleware).forRoutes("*");
   }
 }

@@ -6,6 +6,7 @@
     "^.+\\.(t|j)s$": ["ts-jest", { "tsconfig": "tsconfig.json" }]
   },
   "testEnvironment": "node",
+  "transformIgnorePatterns": ["/node_modules/(?!(@scure|@noble|otplib|@otplib)/)"],
   "moduleNameMapper": {
     "^@/(.*)$": "<rootDir>/src/$1",
     "^@common/(.*)$": "<rootDir>/src/common/$1",

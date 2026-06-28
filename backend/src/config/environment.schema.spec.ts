@@ -22,5 +22,8 @@ describe("validateEnvironment", () => {
 
     expect(env.WEB_ORIGINS).toEqual(["http://localhost:5173", "http://127.0.0.1:5173"]);
     expect(env.RATE_LIMIT_MAX).toBe(100);
+    expect(env.MFA_ISSUER).toBe("NOVAEX");
+    expect(env.MAX_LOGIN_ATTEMPTS).toBe(5);
+    expect(env.PASSWORD_EXPIRY_DAYS).toBe(90);
   });
 });

@@ -21,4 +21,5 @@ export interface JwtRefreshPayload {
   sub: string;
   familyId: string;
   tokenType: "refresh";
+  rememberMe?: boolean;
 }

@@ -8,6 +8,7 @@ module.exports = {
   collectCoverageFrom: ["src/**/*.(t|j)s"],
   coverageDirectory: "coverage",
   testEnvironment: "node",
+  transformIgnorePatterns: ["/node_modules/(?!(@scure|@noble|otplib|@otplib)/)"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
     "^@common/(.*)$": "<rootDir>/src/common/$1",
