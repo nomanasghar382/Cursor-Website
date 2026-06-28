@@ -77,7 +77,7 @@ export function CatalogSearch({ defaultValue = "" }: { defaultValue?: string }) 
 
     if (!recognitionCtor) return;
 
-    const recognition = new recognitionCtor();
+    const recognition = new recognitionCtor() as RecognitionInstance;
     recognition.lang = "en-US";
     recognition.interimResults = false;
     recognition.onstart = () => setListening(true);

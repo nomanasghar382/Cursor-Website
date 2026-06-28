@@ -33,9 +33,9 @@ export function SearchBar({ defaultValue = "" }: { defaultValue?: string }) {
   );
 }
 
-export function AiSearchBox() {
+export function AiSearchBox({ defaultValue = "" }: { defaultValue?: string }) {
   const router = useRouter();
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(defaultValue);
 
   return (
     <div className="glass-panel-strong rounded-[2rem] p-4">
@@ -57,7 +57,7 @@ export function AiSearchBox() {
           aria-label="AI shopping prompt"
         />
         <Button variant="gradient" type="submit">
-          Generate picks
+          Open AI Studio
         </Button>
       </form>
     </div>
