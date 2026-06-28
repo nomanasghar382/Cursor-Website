@@ -1,8 +1,9 @@
+import { Suspense } from "react";
 import { buildMetadata } from "@/lib/seo";
 import { LoginForm } from "@/features/auth/components/login-form";
 import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata = buildMetadata({ title: "Sign in", path: "/login" });
+export const metadata = buildMetadata({ title: "Sign in", path: "/login", noIndex: true });
 
 export default function LoginPage() {
   return (
@@ -12,7 +13,9 @@ export default function LoginPage() {
         <CardDescription>Sign in to your NOVAEX account with enterprise-grade security.</CardDescription>
       </CardHeader>
       <CardContent>
-        <LoginForm />
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading...</p>}>
+          <LoginForm />
+        </Suspense>
       </CardContent>
     </>
   );

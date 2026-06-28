@@ -3,6 +3,8 @@ import { ConfigService } from "@nestjs/config";
 import { Response } from "express";
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "../../../common/constants/app.constants";
 
+const REFRESH_COOKIE_PATH = "/api/v1/auth";
+
 @Injectable()
 export class CookieAuthService {
   constructor(private readonly configService: ConfigService) {}
@@ -29,13 +31,13 @@ export class CookieAuthService {
       sameSite: "strict",
       maxAge: refreshMaxAge,
       signed: true,
-      path: "/api/auth/refresh",
+      path: REFRESH_COOKIE_PATH,
     });
   }
 
   clearAuthCookies(response: Response): void {
     response.clearCookie(ACCESS_TOKEN_COOKIE);
-    response.clearCookie(REFRESH_TOKEN_COOKIE, { path: "/api/auth/refresh" });
+    response.clearCookie(REFRESH_TOKEN_COOKIE, { path: REFRESH_COOKIE_PATH });
   }
 
   private durationToMs(duration: string): number {

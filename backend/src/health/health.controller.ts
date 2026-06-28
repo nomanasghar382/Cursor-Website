@@ -1,6 +1,7 @@
-import { Controller, Get, VERSION_NEUTRAL } from "@nestjs/common";
+import { Controller, Get, Res, VERSION_NEUTRAL } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { SkipThrottle } from "@nestjs/throttler";
+import { Response } from "express";
 import { Public } from "../common/decorators/public.decorator";
 import { HealthService } from "./health.service";
 
@@ -24,7 +25,11 @@ export class HealthController {
 
   @Public()
   @Get("ready")
-  readiness() {
-    return this.healthService.readiness();
+  async readiness(@Res({ passthrough: true }) response: Response) {
+    const result = await this.healthService.readiness();
+    if (result.status !== "ok") {
+      response.status(503);
+    }
+    return result;
   }
 }

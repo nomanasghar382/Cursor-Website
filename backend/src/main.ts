@@ -21,7 +21,7 @@ function resolveLogLevels(level: string): LogLevel[] {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, { bufferLogs: true, rawBody: true });
   const configService = app.get(ConfigService);
   const nodeEnv = configService.get<string>("app.nodeEnv", "development");
   const isProduction = nodeEnv === "production";

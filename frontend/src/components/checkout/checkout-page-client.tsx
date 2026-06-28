@@ -58,12 +58,21 @@ export function CheckoutPageClient() {
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
 
   useEffect(() => {
-    if (token) void hydrateCart(token);
-    void checkoutApi.getShippingMethods().then((result) => {
-      setShippingMethods(result.methods);
-      setShippingMethodId(result.methods[0]?.id);
-    });
-  }, [token, hydrateCart]);
+    const init = async () => {
+      if (token) await hydrateCart(token);
+      const state = useCommerceStore.getState();
+      const count = state.cart?.items.length ?? state.guestCart.length;
+      if (count === 0) {
+        router.replace("/cart");
+        return;
+      }
+      void checkoutApi.getShippingMethods().then((result) => {
+        setShippingMethods(result.methods);
+        setShippingMethodId(result.methods[0]?.id);
+      });
+    };
+    void init();
+  }, [token, hydrateCart, router]);
 
   const refreshPreview = async () => {
     const result = await checkoutApi.preview(token, {

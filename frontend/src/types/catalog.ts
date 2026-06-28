@@ -19,6 +19,7 @@ export type ProductCard = {
   imageUrl?: string;
   colors: string[];
   discountPercent?: number;
+  defaultVariantId?: string;
   createdAt: string;
 };
 

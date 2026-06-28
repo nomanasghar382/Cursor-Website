@@ -10,6 +10,7 @@ export default function configuration(env: EnvironmentVariables) {
       version: env.APP_VERSION,
       baseUrl: env.APP_BASE_URL,
       webOrigins: env.WEB_ORIGINS,
+      frontendUrl: env.FRONTEND_URL ?? env.WEB_ORIGINS[0] ?? "http://localhost:3000",
       logLevel: env.LOG_LEVEL,
     },
     database: {

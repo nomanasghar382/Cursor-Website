@@ -17,7 +17,7 @@ export function AdminLoginForm() {
   const setSession = useAuthStore((state) => state.setSession);
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "admin@novaex.ai", password: "", rememberMe: true },
+    defaultValues: { email: "", password: "", rememberMe: true },
   });
 
   const onSubmit = form.handleSubmit(async (values) => {

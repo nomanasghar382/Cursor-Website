@@ -6,4 +6,9 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   npm run migrate:deploy
 fi
 
+if [ "${RUN_SEED:-false}" = "true" ]; then
+  echo "Seeding database..."
+  (cd /database && npm ci --omit=dev && npm run seed)
+fi
+
 exec node dist/main.js

@@ -1,50 +1,57 @@
-# NEXORA AI Commerce Platform (Frontend + Node.js Backend)
+# NOVAEX — AI-Native Enterprise Commerce
 
-Ultra-premium React/Vite storefront with a Node.js API for auth, products, cart, wishlist, and checkout.
+NOVAEX is a full-stack ecommerce platform with AI discovery, vendor marketplace operations, fulfillment, CMS/marketing, and enterprise admin tooling.
 
-## Stack
+## Monorepo structure
 
-- Frontend: React + TypeScript + Vite
-- TailwindCSS
-- Three.js + React Three Fiber + Drei
-- GSAP ScrollTrigger
-- Framer Motion
-- Backend: Node.js + Express + JWT + Zod
+| Path | Stack | Purpose |
+|------|-------|---------|
+| `frontend/` | Next.js 15, React 19, Tailwind | Customer storefront, account, admin & vendor portals |
+| `backend/` | NestJS, Prisma, Redis, BullMQ | REST API, auth, payments, fulfillment, AI |
+| `database/` | PostgreSQL 17 + pgvector | Schema, migrations, seed data |
 
-## Local development
+> The legacy Vite app at the repository root is deprecated. Use `frontend/` for all storefront work.
 
-### 1) Start backend API
+## Quick start
 
 ```bash
-cd backend
-npm install
+# 1. Database
+cd database && npm ci && npm run migrate:deploy && npm run seed
+
+# 2. Backend API (port 4000)
+cd backend && npm ci && cp .env.example .env
+npm run dev
+
+# 3. Frontend (port 3000)
+cd frontend && npm ci && cp .env.example .env
 npm run dev
 ```
 
-Backend runs at `http://localhost:4000` with API routes under `/api`.
+**Demo credentials** (after seed):
 
-### 2) Start frontend
+- Admin: `admin@novaex.ai` / `NOVAEX-Admin-2026!`
+- Customer: `customer1@novaex.ai` / `NOVAEX-Customer-2026!`
 
-```bash
-cd ..
-npm install
-npm run dev
-```
-
-Frontend runs at `http://localhost:5173` and calls `http://localhost:4000/api` by default.
-
-Optional env override:
+## Docker
 
 ```bash
-VITE_API_URL=http://localhost:4000/api
+cp backend/.env.example backend/.env
+docker compose up --build
 ```
 
-## Production build
+## Documentation
 
-```bash
-npm run build
-```
+- [Deployment Guide](./DEPLOYMENT.md)
+- [Testing Guide](./TESTING.md)
+- [Launch Audit](./LAUNCH_AUDIT.md)
+- [Developer Guide](./docs/DEVELOPER_GUIDE.md)
+- [Admin Guide](./docs/ADMIN_GUIDE.md)
+- [User Guide](./docs/USER_GUIDE.md)
 
-## 3D assets
+## API docs
 
-The current implementation uses procedural PBR-style geometry so the landing page works immediately. Final Blender, Spline, or marketplace GLB models can be placed in `public/models` and wired into `src/components/MarketplaceScene.tsx`.
+Swagger UI (non-production): `http://localhost:4000/api/v1/docs`
+
+## License
+
+Proprietary — NOVAEX AI Commerce.

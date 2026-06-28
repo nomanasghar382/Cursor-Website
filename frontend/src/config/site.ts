@@ -6,7 +6,7 @@ export const siteConfig = {
   tagline: "Commerce intelligence, reimagined.",
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   apiUrl: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1",
-  ogImage: "/og/novaex-default.jpg",
+  ogImage: "/og/novaex-default.svg",
   links: {
     twitter: "https://twitter.com/novaex",
     github: "https://github.com/nomanasghar382/Cursor-Website",

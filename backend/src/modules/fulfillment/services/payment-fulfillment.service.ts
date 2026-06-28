@@ -50,6 +50,11 @@ export class PaymentFulfillmentService {
       status: "FAILED",
       rawResponse: { paymentIntentId } as Prisma.InputJsonValue,
     });
+
+    if (payment.order.status === "PENDING_PAYMENT") {
+      await this.inventoryService.restoreOrderInventory(payment.orderId);
+      await this.lifecycleService.transitionOrder(payment.orderId, "CANCELLED", "Payment failed", "system");
+    }
   }
 
   async retryPayment(userId: string, orderId: string) {

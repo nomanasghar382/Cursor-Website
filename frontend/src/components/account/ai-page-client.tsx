@@ -109,7 +109,7 @@ export function AiPageClient() {
                 <Badge variant="accent">{Math.round(item.score * 100)}% match</Badge>
               </div>
               <Button asChild variant="outline" className="mt-4 w-full">
-                <Link href={`/products/${item.slug}`}>View product</Link>
+                <Link href={`/products/${item.productId}`}>View product</Link>
               </Button>
             </motion.article>
           ))}

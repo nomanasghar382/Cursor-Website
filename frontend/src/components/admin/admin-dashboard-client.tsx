@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Activity, DollarSign, Package, ShoppingBag, Sparkles, TrendingUp, Users } from "lucide-react";
 import { AdminBarChart } from "@/components/admin/admin-bar-chart";
 import { AdminPanel, AdminStatCard } from "@/components/admin/admin-stat-card";
+import { ErrorState } from "@/components/common/state-panels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,16 +20,29 @@ export function AdminDashboardClient() {
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [ai, setAi] = useState<AdminAiInsights | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (!ready || !token) return;
+  const load = () => {
+    if (!token) return;
+    setLoading(true);
+    setError(false);
     void Promise.all([adminApi.dashboard(token), adminApi.aiInsights(token)])
       .then(([dashboardResult, aiResult]) => {
         setDashboard(dashboardResult);
         setAi(aiResult);
       })
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (!ready || !token) return;
+    load();
   }, [ready, token]);
+
+  if (error && !loading) {
+    return <ErrorState title="Admin dashboard unavailable" description="Could not load executive metrics." onRetry={load} />;
+  }
 
   if (loading || !dashboard) {
     return (

@@ -6,6 +6,7 @@ export const metadata = buildMetadata({
   title: "Account Dashboard",
   description: "Your premium NOVAEX customer command center.",
   path: "/account",
+  noIndex: true,
 });
 
 export default function AccountPage() {

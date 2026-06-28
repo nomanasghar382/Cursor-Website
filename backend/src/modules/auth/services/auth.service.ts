@@ -260,7 +260,7 @@ export class AuthService {
       dto.email,
       this.configService.getOrThrow<number>("auth.passwordResetTtlMinutes") * 60,
     );
-    const resetUrl = `${this.configService.getOrThrow<string>("app.baseUrl")}/reset-password?email=${encodeURIComponent(dto.email)}&token=${token}`;
+    const resetUrl = `${this.configService.getOrThrow<string>("app.frontendUrl")}/reset-password?email=${encodeURIComponent(dto.email)}&token=${token}`;
     await this.mailService.sendEmail({
       to: dto.email,
       subject: "Reset your NOVAEX password",
@@ -397,7 +397,7 @@ export class AuthService {
       dto.email,
       this.configService.getOrThrow<number>("auth.magicLinkTtlMinutes") * 60,
     );
-    const magicUrl = `${this.configService.getOrThrow<string>("app.baseUrl")}/magic-login?email=${encodeURIComponent(dto.email)}&token=${token}`;
+    const magicUrl = `${this.configService.getOrThrow<string>("app.frontendUrl")}/magic-login?email=${encodeURIComponent(dto.email)}&token=${token}`;
     await this.mailService.sendEmail({
       to: dto.email,
       subject: "Your NOVAEX magic sign-in link",
@@ -654,7 +654,7 @@ export class AuthService {
       email,
       this.configService.getOrThrow<number>("auth.emailVerificationTtlMinutes") * 60,
     );
-    const verifyUrl = `${this.configService.getOrThrow<string>("app.baseUrl")}/verify-email?email=${encodeURIComponent(email)}&token=${token}`;
+    const verifyUrl = `${this.configService.getOrThrow<string>("app.frontendUrl")}/verify-email?email=${encodeURIComponent(email)}&token=${token}`;
     await this.mailService.sendEmail({
       to: email,
       subject: "Verify your NOVAEX account",

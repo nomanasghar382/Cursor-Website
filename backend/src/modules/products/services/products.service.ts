@@ -116,6 +116,7 @@ export class ProductsService {
       colors: this.extractColors(product),
       discountPercent,
       createdAt: product.createdAt.toISOString(),
+      defaultVariantId: variant?.id,
     };
   }
 

@@ -23,8 +23,12 @@ import { formatCurrency } from "@/lib/utils";
 export function DashboardOverview({ data, loading }: { data: DashboardData | null; loading: boolean }) {
   const prefersReducedMotion = useReducedMotion();
 
-  if (loading || !data) {
+  if (loading) {
     return <DashboardSkeleton />;
+  }
+
+  if (!data) {
+    return null;
   }
 
   return (

@@ -15,19 +15,44 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TiltCard } from "@/components/home/tilt-card";
+import { useAuthStore } from "@/stores/auth-store";
+import { useCommerceStore } from "@/stores/commerce-store";
 import { useHomeStore } from "@/stores/home-store";
+import { getApiErrorMessage } from "@/lib/api/errors";
 import type { ProductCard } from "@/types/catalog";
 import { cn, formatCurrency } from "@/lib/utils";
 
 export function TrendingProductCard({ product }: { product: ProductCard }) {
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const token = useAuthStore((state) => state.accessToken);
   const wishlist = useHomeStore((state) => state.wishlist);
   const compareList = useHomeStore((state) => state.compareList);
   const toggleWishlist = useHomeStore((state) => state.toggleWishlist);
-  const addToCart = useHomeStore((state) => state.addToCart);
   const toggleCompare = useHomeStore((state) => state.toggleCompare);
+  const addToCart = useCommerceStore((state) => state.addToCart);
   const isWishlisted = wishlist.includes(product.id);
   const isCompared = compareList.includes(product.id);
+
+  const handleAddToCart = async () => {
+    if (!product.defaultVariantId) {
+      toast.error("This product is not available for quick add.");
+      return;
+    }
+    setAdding(true);
+    try {
+      await addToCart({
+        token,
+        variantId: product.defaultVariantId,
+        productId: product.id,
+      });
+      toast.success("Added to cart");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <>
@@ -91,14 +116,7 @@ export function TrendingProductCard({ product }: { product: ProductCard }) {
                 <GitCompare className="h-4 w-4" />
                 Compare
               </Button>
-              <Button
-                size="sm"
-                variant="gradient"
-                onClick={() => {
-                  addToCart(product.id);
-                  toast.success("Added to cart");
-                }}
-              >
+              <Button size="sm" variant="gradient" disabled={adding} onClick={() => void handleAddToCart()}>
                 <ShoppingCart className="h-4 w-4" />
                 Add to cart
               </Button>

@@ -3,7 +3,7 @@ import { siteConfig } from "@/config/site";
 import { growthApi } from "@/lib/api/growth";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticRoutes = ["", "/products", "/blog", "/ai", "/login", "/register", "/account", "/enterprise"];
+  const staticRoutes = ["", "/products", "/blog", "/ai", "/enterprise", "/about", "/privacy", "/terms"];
   const staticEntries = staticRoutes.map((route) => ({
     url: `${siteConfig.url}${route}`,
     lastModified: new Date(),
