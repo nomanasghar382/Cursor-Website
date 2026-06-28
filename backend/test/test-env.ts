@@ -24,6 +24,7 @@ export function applyTestEnvironment() {
     MAIL_FROM: "NOVAEX <test@novaex.ai>",
     CSRF_ENABLED: "false",
     RATE_LIMIT_MAX: "10000",
+    ENABLE_TEST_PAYMENT_SIMULATION: "true",
   };
 
   for (const [key, value] of Object.entries(defaults)) {

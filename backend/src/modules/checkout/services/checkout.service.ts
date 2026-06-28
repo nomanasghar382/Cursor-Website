@@ -220,7 +220,11 @@ export class CheckoutService {
         gateway: payment.gateway,
         status: payment.status,
         clientSecret: paymentIntent.client_secret,
-        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? null,
+        publishableKey:
+          this.configService.get<string>("stripe.publishableKey") ??
+          process.env.STRIPE_PUBLISHABLE_KEY ??
+          process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ??
+          null,
         supportedGateways: ["STRIPE", "PAYPAL", "APPLE_PAY", "GOOGLE_PAY"],
       },
     };

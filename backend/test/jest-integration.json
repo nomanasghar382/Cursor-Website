@@ -1,7 +1,7 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": "..",
-  "testRegex": "(health|security|products|auth-flow)\\.e2e-spec\\.ts$",
+  "testRegex": "(health|security|products|auth-flow|payments-simulation)\\.e2e-spec\\.ts$",
   "testTimeout": 60000,
   "maxWorkers": 1,
   "transform": {

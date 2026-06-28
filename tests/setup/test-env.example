@@ -16,5 +16,7 @@ STRIPE_WEBHOOK_SECRET=whsec_placeholder
 RESEND_API_KEY=re_test_placeholder
 MAIL_FROM=NOVAEX <test@novaex.ai>
 CSRF_ENABLED=false
+ENABLE_TEST_PAYMENT_SIMULATION=true
+STRIPE_PUBLISHABLE_KEY=pk_test_simulation
 NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
 NEXT_PUBLIC_APP_URL=http://localhost:3000

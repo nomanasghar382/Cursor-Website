@@ -108,6 +108,8 @@ jobs:
           STRIPE_WEBHOOK_SECRET: whsec_ci
           RESEND_API_KEY: re_ci
           MAIL_FROM: NOVAEX <ci@novaex.ai>
+          ENABLE_TEST_PAYMENT_SIMULATION: "true"
+          STRIPE_PUBLISHABLE_KEY: pk_test_ci
       - name: Integration tests
         working-directory: backend
         run: npm run test:integration
@@ -126,6 +128,8 @@ jobs:
           STRIPE_WEBHOOK_SECRET: whsec_ci
           RESEND_API_KEY: re_ci
           MAIL_FROM: NOVAEX <ci@novaex.ai>
+          ENABLE_TEST_PAYMENT_SIMULATION: "true"
+          STRIPE_PUBLISHABLE_KEY: pk_test_ci
 
   frontend-unit:
     runs-on: ubuntu-latest
@@ -255,3 +259,58 @@ jobs:
           STRIPE_WEBHOOK_SECRET: whsec_ci
           RESEND_API_KEY: re_ci
           MAIL_FROM: NOVAEX <ci@novaex.ai>
+
+  playwright-e2e:
+    needs: backend-integration
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: novaex
+          POSTGRES_USER: novaex_user
+          POSTGRES_PASSWORD: novaex_password
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install Playwright browser
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run Playwright E2E
+        working-directory: frontend
+        run: npm run test:e2e
+        env:
+          CI: true
+          DATABASE_URL: postgresql://novaex_user:novaex_password@localhost:5432/novaex?schema=public
+          ENABLE_TEST_PAYMENT_SIMULATION: "true"
+          STRIPE_SECRET_KEY: sk_test_ci
+          STRIPE_WEBHOOK_SECRET: whsec_ci
+          STRIPE_PUBLISHABLE_KEY: pk_test_ci
+          JWT_ACCESS_SECRET: ci-access-secret-with-more-than-twenty-four-characters
+          JWT_REFRESH_SECRET: ci-refresh-secret-with-more-than-twenty-four-characters
+          COOKIE_SECRET: ci-cookie-secret-with-more-than-twenty-four-characters
+          BETTER_AUTH_SECRET: ci-better-auth-secret-with-more-than-twenty-four-characters
+          BETTER_AUTH_URL: http://localhost:4000
+          CLOUDINARY_CLOUD_NAME: ci
+          CLOUDINARY_API_KEY: ci
+          CLOUDINARY_API_SECRET: ci
+          RESEND_API_KEY: re_ci
+          MAIL_FROM: NOVAEX <ci@novaex.ai>
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: tests/reports/playwright/

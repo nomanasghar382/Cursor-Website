@@ -4,6 +4,7 @@ import { PaymentsModule } from "../payments/payments.module";
 import { FulfillmentAdminController } from "./controllers/fulfillment-admin.controller";
 import { FulfillmentController } from "./controllers/fulfillment.controller";
 import { PaymentsWebhookController } from "./controllers/payments-webhook.controller";
+import { TestPaymentsController } from "./controllers/test-payments.controller";
 import { FulfillmentRepository } from "./repositories/fulfillment.repository";
 import { FulfillmentNotificationService } from "./services/fulfillment-notification.service";
 import { InvoiceFulfillmentService } from "./services/invoice-fulfillment.service";
@@ -14,7 +15,7 @@ import { ShippingFulfillmentService } from "./services/shipping-fulfillment.serv
 
 @Module({
   imports: [PaymentsModule, NotificationsModule],
-  controllers: [FulfillmentController, FulfillmentAdminController, PaymentsWebhookController],
+  controllers: [FulfillmentController, FulfillmentAdminController, PaymentsWebhookController, TestPaymentsController],
   providers: [
     FulfillmentRepository,
     FulfillmentNotificationService,

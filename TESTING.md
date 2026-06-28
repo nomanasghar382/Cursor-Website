@@ -99,6 +99,23 @@ Bootstrapped via `backend/test/helpers/bootstrap-app.ts`:
 - Auth pages (login, register, forgot password)
 - Cart, checkout, AI page
 - Admin and vendor login portals
+- **Authenticated customer** — account dashboard, cart, orders (`authenticated-customer.spec.ts`)
+- **Authenticated admin** — dashboard, products, orders (`authenticated-admin.spec.ts`)
+- **Authenticated vendor** — dashboard, products, orders (`authenticated-vendor.spec.ts`)
+- **Checkout + Stripe simulation** — API webhook simulation and confirmation page (`checkout-payment.spec.ts`)
+
+Seeded credentials for E2E:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Customer | `maya.chen@example.com` | `NOVAEX-Customer-2026!` |
+| Admin / Vendor | `admin@novaex.ai` | `NOVAEX-Admin-2026!` |
+
+Enable payment simulation for checkout E2E:
+
+```bash
+ENABLE_TEST_PAYMENT_SIMULATION=true npm run test:e2e
+```
 
 Set `PLAYWRIGHT_SKIP_WEBSERVER=1` when apps are already running.
 
