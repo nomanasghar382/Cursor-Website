@@ -23,6 +23,13 @@ export const authApi = {
     });
   },
 
+  vendorLogin(payload: LoginPayload) {
+    return apiRequest<AuthSession & { mfaRequired?: boolean; methods?: string[] }>("auth/vendor/login", {
+      method: "POST",
+      body: { ...payload, audience: "vendor" },
+    });
+  },
+
   logout(token: string, refreshToken?: string) {
     return apiRequest<{ message: string }>("auth/logout", {
       method: "POST",
