@@ -35,12 +35,12 @@ export function ProductGallery({ product }: ProductGalleryProps) {
   }, [product.assets360.length]);
 
   useEffect(() => {
-    if (viewerMode !== "360" || product.assets360.length === 0) return;
+    if (viewerMode !== "360" || product.assets360.length === 0 || prefersReducedMotion) return;
     let frame = 0;
     const interval = window.setInterval(() => {
       frame = (frame + 1) % Math.max(product.assets360[0]?.frameCount ?? 24, 24);
       setActiveIndex(frame % images.length);
-    }, prefersReducedMotion ? 0 : 120);
+    }, 120);
     return () => window.clearInterval(interval);
   }, [viewerMode, product.assets360, images.length, prefersReducedMotion]);
 

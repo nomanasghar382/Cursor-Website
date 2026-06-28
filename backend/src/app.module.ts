@@ -43,6 +43,7 @@ import { NotificationsModule } from "./modules/notifications/notifications.modul
 import { PaymentsModule } from "./modules/payments/payments.module";
 import { UploadsModule } from "./uploads/uploads.module";
 import { HealthModule } from "./health/health.module";
+import { MonitoringModule } from "./monitoring/monitoring.module";
 import { WebsocketModule } from "./websocket/websocket.module";
 import { CronModule } from "./cron/cron.module";
 import { EventsModule } from "./events/events.module";
@@ -96,6 +97,7 @@ import { EmailsModule } from "./emails/emails.module";
     PaymentsModule,
     UploadsModule,
     HealthModule,
+    MonitoringModule,
     WebsocketModule,
     CronModule,
     EventsModule,

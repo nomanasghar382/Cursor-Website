@@ -5,6 +5,7 @@ on:
     paths:
       - "backend/**"
       - "database/**"
+      - "frontend/**"
       - ".github/workflows/backend.yml"
   push:
     branches:
@@ -77,3 +78,6 @@ jobs:
       - name: Test backend
         working-directory: backend
         run: npm test
+      - name: Test backend e2e
+        working-directory: backend
+        run: npm run test:e2e

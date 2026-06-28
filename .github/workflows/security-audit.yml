@@ -1,0 +1,33 @@
+name: Security Audit
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workspace:
+          - backend
+          - frontend
+          - database
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
+      - name: Install dependencies
+        working-directory: ${{ matrix.workspace }}
+        run: npm ci
+      - name: npm audit (high severity)
+        working-directory: ${{ matrix.workspace }}
+        run: npm audit --audit-level=high
+        continue-on-error: true

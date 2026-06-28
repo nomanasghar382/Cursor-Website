@@ -4,7 +4,7 @@ import { HomepageAnnouncement } from "@/components/home/homepage-announcement";
 import { CommandPalette } from "@/components/search/command-palette";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { AnimatedBackground } from "@/components/motion/animated-background";
-import { AiAssistantWidget } from "@/components/ai/ai-assistant-widget";
+import { LazyAiAssistantWidget } from "@/components/ai/lazy-ai-assistant-widget";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +16,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <SiteFooter />
       <CommandPalette />
       <MobileNav />
-      <AiAssistantWidget />
+      <LazyAiAssistantWidget />
     </div>
   );
 }

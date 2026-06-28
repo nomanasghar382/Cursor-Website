@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { CommandPalette } from "@/components/search/command-palette";
 import { AnimatedBackground } from "@/components/motion/animated-background";
 import { MiniCartDrawer } from "@/components/cart/mini-cart-drawer";
-import { AiAssistantWidget } from "@/components/ai/ai-assistant-widget";
+import { LazyAiAssistantWidget } from "@/components/ai/lazy-ai-assistant-widget";
 
 export default function CommerceLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,7 +14,7 @@ export default function CommerceLayout({ children }: { children: React.ReactNode
       <SiteFooter />
       <CommandPalette />
       <MiniCartDrawer />
-      <AiAssistantWidget />
+      <LazyAiAssistantWidget />
     </div>
   );
 }
