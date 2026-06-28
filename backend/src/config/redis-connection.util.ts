@@ -38,15 +38,34 @@ function withRedisFamily(redisUrl: string): string {
   return parsed.toString();
 }
 
-export function createRedisClientOptions(settings: RedisConnectionSettings): string | RedisOptions {
+export function createRedisClientOptions(settings: RedisConnectionSettings): RedisOptions {
   if (settings.url) {
-    return settings.url;
+    const parsed = new URL(settings.url);
+    const options: RedisOptions = {
+      host: parsed.hostname,
+      port: Number(parsed.port || 6379),
+      password: parsed.password || undefined,
+      username: parsed.username || undefined,
+      family: 0,
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: true,
+      lazyConnect: true,
+    };
+
+    if (settings.url.startsWith("rediss://")) {
+      options.tls = { rejectUnauthorized: false };
+    }
+
+    return options;
   }
 
   return {
     host: settings.host,
     port: settings.port,
     password: settings.password,
-    family: 0,
+    family: settings.host.includes(".railway.internal") ? 0 : undefined,
+    maxRetriesPerRequest: 3,
+    enableReadyCheck: true,
+    lazyConnect: true,
   };
 }

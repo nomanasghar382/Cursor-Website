@@ -10,16 +10,7 @@ export class RedisService implements OnModuleDestroy {
 
   constructor(configService: ConfigService) {
     const settings = configService.getOrThrow<RedisConnectionSettings>("redis");
-    const connection = createRedisClientOptions(settings);
-
-    this.client = new Redis(connection, {
-      maxRetriesPerRequest: 3,
-      enableReadyCheck: true,
-      lazyConnect: true,
-      ...(typeof connection === "string" && connection.startsWith("rediss://")
-        ? { tls: { rejectUnauthorized: false } }
-        : {}),
-    });
+    this.client = new Redis(createRedisClientOptions(settings));
 
     this.client.on("error", (error) => this.logger.error(error.message));
   }

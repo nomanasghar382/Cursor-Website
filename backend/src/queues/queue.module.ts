@@ -10,25 +10,15 @@ import { RedisModule } from "../shared/redis/redis.module";
     RedisModule,
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const settings = configService.getOrThrow<RedisConnectionSettings>("redis");
-        const connection = createRedisClientOptions(settings);
-
-        return {
-        connection: typeof connection === "string"
-          ? connection
-          : {
-              ...connection,
-              ...(connection.host?.includes(".railway.internal") ? { family: 0 } : {}),
-            },
+      useFactory: (configService: ConfigService) => ({
+        connection: createRedisClientOptions(configService.getOrThrow<RedisConnectionSettings>("redis")),
         defaultJobOptions: {
           attempts: 3,
           backoff: { type: "exponential", delay: 5000 },
           removeOnComplete: 1000,
           removeOnFail: 5000,
         },
-      };
-      },
+      }),
     }),
     BullModule.registerQueue(
       { name: QUEUES.AUDIT },

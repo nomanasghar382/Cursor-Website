@@ -37,7 +37,7 @@ async function bootstrap() {
   });
   const webOrigins = configService.getOrThrow<string[]>("app.webOrigins");
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) => {
       if (isAllowedCorsOrigin(origin, webOrigins)) {
         callback(null, true);
         return;

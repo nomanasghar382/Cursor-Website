@@ -30,7 +30,7 @@ describe("resolveRedisSettings", () => {
 });
 
 describe("createRedisClientOptions", () => {
-  it("returns URL string when REDIS_URL is configured", () => {
+  it("returns Redis options when REDIS_URL is configured", () => {
     const options = createRedisClientOptions({
       url: "redis://default:secret@redis.railway.internal:6379?family=0",
       host: "redis.railway.internal",
@@ -38,6 +38,12 @@ describe("createRedisClientOptions", () => {
       password: "secret",
     });
 
-    expect(options).toBe("redis://default:secret@redis.railway.internal:6379?family=0");
+    expect(options).toMatchObject({
+      host: "redis.railway.internal",
+      port: 6379,
+      password: "secret",
+      username: "default",
+      family: 0,
+    });
   });
 });
