@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { Prisma } from "@prisma/client";
 import { CartRepository } from "../../cart/repositories/cart.repository";
 import { CouponsService } from "../../coupons/services/coupons.service";
@@ -30,6 +31,7 @@ export class CheckoutService {
     private readonly stripeService: StripeService,
     private readonly notificationService: NotificationService,
     private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
   ) {}
 
   async getShippingMethods() {
