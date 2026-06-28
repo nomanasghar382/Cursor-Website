@@ -3063,7 +3063,7 @@ CREATE INDEX "products_metadata_gin_idx" ON "products" USING GIN ("metadata");
 CREATE INDEX "product_variants_metadata_gin_idx" ON "product_variants" USING GIN ("metadata");
 CREATE INDEX "orders_metadata_gin_idx" ON "orders" USING GIN ("metadata");
 CREATE INDEX "analytics_events_properties_gin_idx" ON "analytics_events" USING GIN ("properties");
-CREATE INDEX "audit_logs_changes_gin_idx" ON "audit_logs" USING GIN ("changes");
+CREATE INDEX "audit_logs_metadata_gin_idx" ON "audit_logs" USING GIN ("metadata");
 CREATE INDEX "api_keys_scopes_gin_idx" ON "api_keys" USING GIN ("scopes");
 CREATE INDEX "discount_rules_conditions_gin_idx" ON "discount_rules" USING GIN ("conditions");
 CREATE INDEX "discount_rules_effects_gin_idx" ON "discount_rules" USING GIN ("effects");

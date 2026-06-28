@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { Prisma } from "@prisma/client";
 import { CartRepository } from "../../cart/repositories/cart.repository";
 import { CouponsService } from "../../coupons/services/coupons.service";
@@ -30,6 +31,7 @@ export class CheckoutService {
     private readonly stripeService: StripeService,
     private readonly notificationService: NotificationService,
     private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
   ) {}
 
   async getShippingMethods() {
@@ -220,7 +222,11 @@ export class CheckoutService {
         gateway: payment.gateway,
         status: payment.status,
         clientSecret: paymentIntent.client_secret,
-        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? null,
+        publishableKey:
+          this.configService.get<string>("stripe.publishableKey") ??
+          process.env.STRIPE_PUBLISHABLE_KEY ??
+          process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ??
+          null,
         supportedGateways: ["STRIPE", "PAYPAL", "APPLE_PAY", "GOOGLE_PAY"],
       },
     };

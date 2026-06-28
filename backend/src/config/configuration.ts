@@ -58,6 +58,8 @@ export default function configuration(env: EnvironmentVariables) {
     stripe: {
       secretKey: env.STRIPE_SECRET_KEY,
       webhookSecret: env.STRIPE_WEBHOOK_SECRET,
+      publishableKey: env.STRIPE_PUBLISHABLE_KEY,
+      enableTestSimulation: env.ENABLE_TEST_PAYMENT_SIMULATION,
     },
     mail: {
       resendApiKey: env.RESEND_API_KEY,

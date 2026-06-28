@@ -1,0 +1,22 @@
+# Copy to backend/.env.test or export before running integration tests
+NODE_ENV=test
+DATABASE_URL=postgresql://novaex_user:novaex_password@localhost:5432/novaex_test?schema=public
+REDIS_HOST=localhost
+REDIS_PORT=6379
+JWT_ACCESS_SECRET=test-access-secret-with-more-than-twenty-four-characters
+JWT_REFRESH_SECRET=test-refresh-secret-with-more-than-twenty-four-characters
+COOKIE_SECRET=test-cookie-secret-with-more-than-twenty-four-characters
+BETTER_AUTH_SECRET=test-better-auth-secret-with-more-than-twenty-four-characters
+BETTER_AUTH_URL=http://localhost:4000
+CLOUDINARY_CLOUD_NAME=test
+CLOUDINARY_API_KEY=test
+CLOUDINARY_API_SECRET=test
+STRIPE_SECRET_KEY=sk_test_placeholder
+STRIPE_WEBHOOK_SECRET=whsec_placeholder
+RESEND_API_KEY=re_test_placeholder
+MAIL_FROM=NOVAEX <test@novaex.ai>
+CSRF_ENABLED=false
+ENABLE_TEST_PAYMENT_SIMULATION=true
+STRIPE_PUBLISHABLE_KEY=pk_test_simulation
+NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+NEXT_PUBLIC_APP_URL=http://localhost:3000

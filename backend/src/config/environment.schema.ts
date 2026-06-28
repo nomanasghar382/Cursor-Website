@@ -46,6 +46,8 @@ export const environmentSchema = z.object({
   CLOUDINARY_API_SECRET: z.string().min(1),
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
+  STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  ENABLE_TEST_PAYMENT_SIMULATION: z.coerce.boolean().default(false),
   RESEND_API_KEY: z.string().min(1),
   MAIL_FROM: z.string().min(1),
   RATE_LIMIT_TTL_MS: z.coerce.number().int().positive().default(60000),

@@ -1,14 +1,23 @@
-FROM node:24-alpine AS dependencies
+FROM node:24-alpine AS base
+# Retry npm downloads on flaky networks (common on Windows Docker builds).
+RUN npm config set fetch-retries 5 \
+ && npm config set fetch-retry-mintimeout 20000 \
+ && npm config set fetch-retry-maxtimeout 120000
+
+FROM base AS dependencies
 WORKDIR /app
 COPY backend/package*.json ./
 RUN npm ci
 
 FROM dependencies AS build
 COPY backend/ ./
+COPY database/package*.json /database/
+RUN cd /database && npm ci
 COPY database/ /database/
+RUN cd /database && DATABASE_URL="postgresql://build:build@localhost:5432/build?schema=public" npx prisma generate
 RUN npm run build
 
-FROM node:24-alpine AS runtime
+FROM base AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 RUN apk add --no-cache curl
@@ -20,9 +29,9 @@ COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/node_modules/prisma ./node_modules/prisma
 COPY --from=build /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY --from=build /app/scripts/docker-entrypoint.sh ./docker-entrypoint.sh
-COPY database/ /database/
-RUN chmod +x ./docker-entrypoint.sh
+COPY --from=build /database /database
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh && chmod +x ./docker-entrypoint.sh
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
   CMD curl -fsS http://127.0.0.1:4000/api/v1/health/live || exit 1
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "./docker-entrypoint.sh"]

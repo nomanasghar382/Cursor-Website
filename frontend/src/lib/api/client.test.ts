@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/types/api";
 import { getApiErrorMessage, isApiError, isRateLimitError, isUnauthorizedError } from "./errors";
 
@@ -18,32 +17,29 @@ describe("api errors", () => {
 });
 
 describe("apiRequest", () => {
+  const originalFetch = global.fetch;
+
   afterEach(() => {
-    vi.unstubAllGlobals();
+    global.fetch = originalFetch;
+    jest.resetModules();
   });
 
   it("unwraps successful API responses", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ data: { ok: true } }),
-      }),
-    );
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { ok: true } }),
+    }) as typeof fetch;
 
     const { apiRequest } = await import("./client");
     await expect(apiRequest("health")).resolves.toEqual({ ok: true });
   });
 
   it("throws ApiError for failed responses", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: false,
-        status: 400,
-        json: async () => ({ message: "Invalid input" }),
-      }),
-    );
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({ message: "Invalid input" }),
+    }) as typeof fetch;
 
     const { apiRequest } = await import("./client");
     await expect(apiRequest("products")).rejects.toMatchObject({

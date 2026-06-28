@@ -28,9 +28,9 @@ jobs:
       - name: Typecheck
         working-directory: frontend
         run: npm run typecheck
-      - name: Test
+      - name: Test frontend
         working-directory: frontend
-        run: npm test
+        run: npm run test:cov
       - name: Build
         working-directory: frontend
         run: npm run build

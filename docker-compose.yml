@@ -33,12 +33,17 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     env_file:
-      - backend/.env
+      - backend/.env.docker
+      - path: backend/.env
+        required: false
     environment:
       DATABASE_URL: postgresql://novaex_user:novaex_password@postgres:5432/novaex?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RUN_MIGRATIONS: "true"
+      RUN_SEED: ${RUN_SEED:-false}
+      AUTO_FIX_FAILED_MIGRATIONS: "true"
+      ENABLE_TEST_PAYMENT_SIMULATION: ${ENABLE_TEST_PAYMENT_SIMULATION:-true}
     ports:
       - "4000:4000"
     depends_on:
