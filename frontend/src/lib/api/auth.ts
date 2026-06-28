@@ -16,6 +16,13 @@ export const authApi = {
     });
   },
 
+  adminLogin(payload: LoginPayload) {
+    return apiRequest<AuthSession & { mfaRequired?: boolean; methods?: string[] }>("auth/super-admin/login", {
+      method: "POST",
+      body: { ...payload, audience: "super-admin" },
+    });
+  },
+
   logout(token: string, refreshToken?: string) {
     return apiRequest<{ message: string }>("auth/logout", {
       method: "POST",
