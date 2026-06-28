@@ -1,12 +1,17 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Bell,
   Bot,
+  CreditCard,
   Headphones,
   Home,
   LayoutDashboard,
+  MapPin,
+  Settings,
   Shield,
   ShoppingBag,
   Sparkles,
+  UserRound,
   Watch,
 } from "lucide-react";
 
@@ -57,9 +62,14 @@ export const primaryNavigation: NavItem[] = [
 
 export const accountNavigation: NavItem[] = [
   { title: "Overview", href: "/account", icon: LayoutDashboard },
+  { title: "Profile", href: "/account/profile", icon: UserRound },
   { title: "Orders", href: "/account/orders", icon: ShoppingBag },
+  { title: "Addresses", href: "/account/addresses", icon: MapPin },
+  { title: "Payments", href: "/account/payments", icon: CreditCard },
+  { title: "Notifications", href: "/account/notifications", icon: Bell },
   { title: "Security", href: "/account/security", icon: Shield },
   { title: "AI Preferences", href: "/account/ai", icon: Sparkles },
+  { title: "Settings", href: "/account/settings", icon: Settings },
 ];
 
 export const footerNavigation = {

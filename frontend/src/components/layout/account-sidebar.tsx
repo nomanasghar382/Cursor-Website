@@ -12,7 +12,7 @@ export function AccountSidebar() {
     <aside className="glass-panel rounded-[2rem] p-4">
       <nav className="space-y-1">
         {accountNavigation.map((item) => {
-          const active = pathname === item.href;
+          const active = pathname === item.href || (item.href !== "/account" && pathname.startsWith(`${item.href}/`));
           const Icon = item.icon;
           return (
             <Link

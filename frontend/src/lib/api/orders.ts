@@ -14,4 +14,19 @@ export const ordersApi = {
       { method: "POST", token },
     );
   },
+  cancel(token: string, orderId: string) {
+    return apiRequest(`orders/${orderId}/cancel`, { method: "POST", token });
+  },
+  requestReturn(token: string, orderId: string, reason: string) {
+    return apiRequest(`orders/${orderId}/return`, { method: "POST", token, body: { reason } });
+  },
+  reorder(token: string, orderId: string) {
+    return apiRequest<{ message: string }>(`orders/${orderId}/reorder`, { method: "POST", token });
+  },
+  getInvoice(token: string, orderId: string) {
+    return apiRequest<{ invoice: Record<string, unknown> }>(`orders/${orderId}/invoice`, { method: "GET", token });
+  },
+  review(token: string, orderId: string, itemId: string, body: { rating: number; title?: string; body: string }) {
+    return apiRequest(`orders/${orderId}/items/${itemId}/review`, { method: "POST", token, body });
+  },
 };

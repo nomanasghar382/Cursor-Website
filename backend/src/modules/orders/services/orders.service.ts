@@ -1,5 +1,7 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../../database/prisma.service";
+import { CartRepository } from "../../cart/repositories/cart.repository";
+import { CreateReviewDto, ReturnRequestDto } from "../../customer/dto/customer.dto";
 
 @Injectable()
 export class OrdersRepository {
@@ -34,7 +36,11 @@ export class OrdersRepository {
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly ordersRepository: OrdersRepository) {}
+  constructor(
+    private readonly ordersRepository: OrdersRepository,
+    private readonly prisma: PrismaService,
+    private readonly cartRepository: CartRepository,
+  ) {}
 
   async list(userId: string) {
     const orders = await this.ordersRepository.listByUser(userId);
@@ -45,6 +51,98 @@ export class OrdersService {
     const order = await this.ordersRepository.findById(userId, orderId);
     if (!order) throw new NotFoundException("Order not found.");
     return { order: this.toDetail(order) };
+  }
+
+  async cancel(userId: string, orderId: string) {
+    const order = await this.ordersRepository.findById(userId, orderId);
+    if (!order) throw new NotFoundException("Order not found.");
+    if (!["PENDING_PAYMENT", "CONFIRMED"].includes(order.status)) {
+      throw new BadRequestException("This order can no longer be cancelled.");
+    }
+    await this.prisma.order.update({ where: { id: orderId }, data: { status: "CANCELLED" } });
+    return this.getById(userId, orderId);
+  }
+
+  async requestReturn(userId: string, orderId: string, dto: ReturnRequestDto) {
+    const order = await this.ordersRepository.findById(userId, orderId);
+    if (!order) throw new NotFoundException("Order not found.");
+    if (order.status !== "DELIVERED") {
+      throw new BadRequestException("Returns are available for delivered orders only.");
+    }
+    await this.prisma.return.create({
+      data: { orderId, userId, reason: dto.reason, status: "REQUESTED" },
+    });
+    return this.getById(userId, orderId);
+  }
+
+  async reorder(userId: string, orderId: string) {
+    const order = await this.ordersRepository.findById(userId, orderId);
+    if (!order) throw new NotFoundException("Order not found.");
+
+    for (const item of order.items) {
+      if (!item.variantId) continue;
+      const variant = await this.cartRepository.findVariant(item.variantId);
+      if (!variant) continue;
+      const cart = await this.cartRepository.findOrCreate(userId);
+      await this.cartRepository.upsertItem(cart.id, item.variantId, item.quantity, Number(item.unitPrice));
+    }
+
+    return { message: "Items added back to your cart." };
+  }
+
+  async getInvoice(userId: string, orderId: string) {
+    const order = await this.ordersRepository.findById(userId, orderId);
+    if (!order) throw new NotFoundException("Order not found.");
+    const invoice = order.invoices[0];
+    if (!invoice) throw new NotFoundException("Invoice not found.");
+
+    return {
+      invoice: {
+        invoiceNumber: invoice.invoiceNumber,
+        issuedAt: invoice.issuedAt?.toISOString(),
+        orderNumber: order.orderNumber,
+        subtotal: Number(order.subtotal),
+        taxTotal: Number(order.taxTotal),
+        shippingTotal: Number(order.shippingTotal),
+        discountTotal: Number(order.discountTotal),
+        grandTotal: Number(order.grandTotal),
+        items: order.items.map((item) => ({
+          name: item.productNameSnapshot,
+          sku: item.skuSnapshot,
+          quantity: item.quantity,
+          unitPrice: Number(item.unitPrice),
+          lineTotal: Number(item.lineTotal),
+        })),
+      },
+    };
+  }
+
+  async createReview(userId: string, orderId: string, orderItemId: string, dto: CreateReviewDto) {
+    const order = await this.ordersRepository.findById(userId, orderId);
+    if (!order) throw new NotFoundException("Order not found.");
+    const item = order.items.find((entry) => entry.id === orderItemId);
+    if (!item?.productId) throw new NotFoundException("Order item not found.");
+
+    const review = await this.prisma.review.upsert({
+      where: { orderItemId },
+      create: {
+        userId,
+        productId: item.productId,
+        orderItemId,
+        rating: dto.rating,
+        title: dto.title,
+        body: dto.body,
+        status: "APPROVED",
+      },
+      update: {
+        rating: dto.rating,
+        title: dto.title,
+        body: dto.body,
+        status: "APPROVED",
+      },
+    });
+
+    return { review: { id: review.id, rating: review.rating } };
   }
 
   private toSummary(order: Awaited<ReturnType<OrdersRepository["listByUser"]>>[number]) {

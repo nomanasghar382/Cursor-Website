@@ -4,25 +4,31 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Package } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
+import { EmptyState } from "@/components/common/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { ordersApi } from "@/lib/api/orders";
-import { useAuthStore } from "@/stores/auth-store";
 import type { OrderSummary } from "@/types/commerce";
 import { formatCurrency } from "@/lib/utils";
 
 export function OrdersPageClient() {
-  const token = useAuthStore((state) => state.accessToken);
+  const { token, ready } = useRequireAuth("/login?next=/account/orders");
   const [orders, setOrders] = useState<OrderSummary[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
-    void ordersApi.list(token).then((result) => setOrders(result.orders));
-  }, [token]);
+    if (!ready || !token) return;
+    void ordersApi.list(token).then((result) => setOrders(result.orders)).finally(() => setLoading(false));
+  }, [ready, token]);
+
+  if (loading) {
+    return <p className="text-muted-foreground">Loading orders...</p>;
+  }
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Account" title="Your orders" description="Track payment status, fulfillment, and delivery across your NOVAEX purchases." />
+      <PageHeader eyebrow="Account" title="Your orders" description="Track payment status, fulfillment, and delivery across your NOVAEX purchases." icon={Package} />
       <div className="space-y-4">
         {orders.map((order) => (
           <article key={order.id} className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-border/60 p-5">
@@ -44,8 +50,19 @@ export function OrdersPageClient() {
             </div>
           </article>
         ))}
-        {orders.length === 0 ? <p className="text-muted-foreground">No orders yet.</p> : null}
+        {orders.length === 0 ? (
+          <EmptyState
+            title="No orders yet"
+            description="When you complete a purchase, your order history will appear here."
+            icon={Package}
+            actionLabel="Browse catalog"
+            onAction={() => {
+              window.location.href = "/products";
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );
 }
+

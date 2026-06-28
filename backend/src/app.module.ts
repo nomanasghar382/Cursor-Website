@@ -29,6 +29,7 @@ import { CartModule } from "./modules/cart/cart.module";
 import { WishlistModule } from "./modules/wishlist/wishlist.module";
 import { CheckoutModule } from "./modules/checkout/checkout.module";
 import { OrdersModule } from "./modules/orders/orders.module";
+import { CustomerModule } from "./modules/customer/customer.module";
 import { CouponsModule } from "./modules/coupons/coupons.module";
 import { AuditModule } from "./modules/audit/audit.module";
 import { StorageModule } from "./modules/storage/storage.module";
@@ -77,6 +78,7 @@ import { EmailsModule } from "./emails/emails.module";
     CouponsModule,
     CheckoutModule,
     OrdersModule,
+    CustomerModule,
     AuditModule,
     StorageModule,
     MailModule,
