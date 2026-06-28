@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, Menu, Moon, Search, Sparkles, Sun, User } from "lucide-react";
+import { ChevronDown, Heart, Menu, Moon, Search, ShoppingCart, Sparkles, Sun, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { siteConfig } from "@/config/site";
 import { primaryNavigation } from "@/config/navigation";
@@ -10,9 +10,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/stores/auth-store";
+import { useHomeStore } from "@/stores/home-store";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
@@ -21,6 +23,9 @@ export function SiteHeader() {
   const scrollY = useScrollPosition();
   const { theme, setTheme } = useTheme();
   const user = useAuthStore((state) => state.user);
+  const wishlist = useHomeStore((state) => state.wishlist);
+  const cart = useHomeStore((state) => state.cart);
+  const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
   const setCommandPaletteOpen = useUiStore((state) => state.setCommandPaletteOpen);
   const setMobileNavOpen = useUiStore((state) => state.setMobileNavOpen);
 
@@ -28,11 +33,13 @@ export function SiteHeader() {
     <header
       className={cn(
         "sticky top-0 z-50 border-b transition-all duration-300",
-        scrollY > 12 ? "border-border/80 bg-background/75 backdrop-blur-2xl" : "border-transparent bg-transparent",
+        scrollY > 12
+          ? "border-border/80 bg-background/70 shadow-[var(--shadow-card)] backdrop-blur-2xl"
+          : "border-transparent bg-background/35 backdrop-blur-xl",
       )}
     >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-6 xl:gap-8">
           <Link href="/" className="font-display text-xl font-semibold tracking-[0.18em]">
             {siteConfig.name}
           </Link>
@@ -76,8 +83,37 @@ export function SiteHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="glass" size="icon" aria-label="Open search" onClick={() => setCommandPaletteOpen(true)}>
+          <Button
+            variant="glass"
+            className="hidden gap-2 md:inline-flex"
+            onClick={() => setCommandPaletteOpen(true)}
+            aria-label="Open AI search"
+          >
             <Search className="h-4 w-4" />
+            <span className="text-sm text-muted-foreground">Search with NovaAI</span>
+          </Button>
+          <Button variant="glass" size="icon" className="md:hidden" aria-label="Open search" onClick={() => setCommandPaletteOpen(true)}>
+            <Search className="h-4 w-4" />
+          </Button>
+          <Button variant="glass" size="icon" className="relative" aria-label="Wishlist" asChild>
+            <Link href="/products">
+              <Heart className="h-4 w-4" />
+              {wishlist.length > 0 ? (
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
+                  {wishlist.length}
+                </span>
+              ) : null}
+            </Link>
+          </Button>
+          <Button variant="glass" size="icon" className="relative" aria-label="Cart" asChild>
+            <Link href="/products">
+              <ShoppingCart className="h-4 w-4" />
+              {cartCount > 0 ? (
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
+                  {cartCount}
+                </span>
+              ) : null}
+            </Link>
           </Button>
           <Button
             variant="glass"
@@ -88,12 +124,26 @@ export function SiteHeader() {
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
           {user ? (
-            <Button variant="glass" asChild>
-              <Link href="/account">
-                <User className="h-4 w-4" />
-                Account
-              </Link>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="glass" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">{user.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem asChild>
+                  <Link href="/account">Account overview</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/account/security">Security settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/login">Switch account</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button variant="gradient" asChild>
               <Link href="/login">
