@@ -1,5 +1,6 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { hash } from "bcryptjs";
+import { createPrismaClient } from "../client.js";
 
 const SEED_TAG = "novaex-enterprise-seed";
 const isDryRun = process.argv.includes("--dry-run");
@@ -27,7 +28,7 @@ if (isDryRun) {
   process.exit(0);
 }
 
-const prisma = new PrismaClient();
+const { prisma, pool } = createPrismaClient();
 
 const addDays = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
@@ -367,4 +368,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });
