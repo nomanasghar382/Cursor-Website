@@ -33,7 +33,9 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     env_file:
-      - backend/.env
+      - backend/.env.docker
+      - path: backend/.env
+        required: false
     environment:
       DATABASE_URL: postgresql://novaex_user:novaex_password@postgres:5432/novaex?schema=public
       REDIS_HOST: redis

@@ -6,8 +6,9 @@ RUN npm ci
 FROM node:24-alpine AS database-deps
 WORKDIR /database
 COPY database/package*.json ./
-# Prisma CLI + tsx are required at container startup for migrate/seed.
 RUN npm ci
+COPY database/ ./
+RUN npx prisma generate
 
 FROM dependencies AS build
 COPY backend/ ./
@@ -26,9 +27,7 @@ COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/node_modules/prisma ./node_modules/prisma
 COPY --from=build /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY --from=build /app/scripts/docker-entrypoint.sh ./docker-entrypoint.sh
-COPY database/ /database/
-COPY --from=database-deps /database/node_modules /database/node_modules
-# Strip Windows CRLF so Alpine can execute the script (avoids "no such file or directory").
+COPY --from=database-deps /database /database
 RUN sed -i 's/\r$//' ./docker-entrypoint.sh && chmod +x ./docker-entrypoint.sh
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
