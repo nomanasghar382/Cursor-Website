@@ -98,10 +98,41 @@ async function ensureCategory(input: {
   });
 }
 
+const productHeroImages: Record<string, string> = {
+  "nova-butler-x1": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80",
+  "orbitwave-neural-pods-pro": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=1200&q=80",
+  "aethersense-climate-hub": "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1200&q=80",
+  "lumacore-health-ring-elite": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=1200&q=80",
+};
+
 async function ensureProductAsset(productId: string, kind: "image" | "model3d" | "asset360" | "ar", url: string, extra: Record<string, unknown>) {
   if (kind === "image") {
-    const existing = await prisma.productImage.findFirst({ where: { productId, url } });
-    return existing ?? prisma.productImage.create({ data: { productId, url, cloudinaryPublicId: String(extra.cloudinaryPublicId), altText: String(extra.altText), isPrimary: Boolean(extra.isPrimary), sortOrder: Number(extra.sortOrder ?? 0), metadata: { seededBy: SEED_TAG } } });
+    const existing = await prisma.productImage.findFirst({ where: { productId, isPrimary: true, deletedAt: null } });
+    if (existing) {
+      return prisma.productImage.update({
+        where: { id: existing.id },
+        data: {
+          url,
+          cloudinaryPublicId: String(extra.cloudinaryPublicId),
+          altText: String(extra.altText),
+          isPrimary: true,
+          sortOrder: Number(extra.sortOrder ?? 0),
+          metadata: { seededBy: SEED_TAG },
+        },
+      });
+    }
+
+    return prisma.productImage.create({
+      data: {
+        productId,
+        url,
+        cloudinaryPublicId: String(extra.cloudinaryPublicId),
+        altText: String(extra.altText),
+        isPrimary: Boolean(extra.isPrimary),
+        sortOrder: Number(extra.sortOrder ?? 0),
+        metadata: { seededBy: SEED_TAG },
+      },
+    });
   }
 
   if (kind === "model3d") {
@@ -296,7 +327,8 @@ async function main() {
       const sku = `${input.skuBase}-${suffix}`;
       await prisma.productVariant.upsert({ where: { sku }, update: { status: "ACTIVE", price: suffix === "BASE" ? input.price : String(Number(input.price) + 80), compareAtPrice: suffix === "PREMIUM" ? String(Number(input.price) + 120) : null }, create: { productId: product.id, sku, barcode: `880${input.skuBase}${suffix}`.replace(/[^0-9A-Z]/g, ""), price: suffix === "BASE" ? input.price : String(Number(input.price) + 80), compareAtPrice: suffix === "PREMIUM" ? String(Number(input.price) + 120) : null, currencyCode: "USD", weightGrams: suffix === "BASE" ? 420 : 520, status: "ACTIVE", metadata: { seededBy: SEED_TAG, edition: suffix.toLowerCase() } } });
     }
-    await ensureProductAsset(product.id, "image", `https://cdn.novaex.ai/products/${input.slug}/hero.webp`, { cloudinaryPublicId: `novaex/${input.slug}/hero`, altText: `${input.name} hero image`, isPrimary: true });
+    const heroImageUrl = productHeroImages[input.slug] ?? "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80";
+    await ensureProductAsset(product.id, "image", heroImageUrl, { cloudinaryPublicId: `novaex/${input.slug}/hero`, altText: `${input.name} hero image`, isPrimary: true });
     await ensureProductAsset(product.id, "model3d", `https://cdn.novaex.ai/products/${input.slug}/model.glb`, { cloudinaryPublicId: `novaex/${input.slug}/model`, format: "glb", lodLevel: 0, fileSizeBytes: 4800000 });
     await ensureProductAsset(product.id, "asset360", `https://cdn.novaex.ai/products/${input.slug}/spin-360.zip`, { format: "webp", frameCount: 72 });
     await ensureProductAsset(product.id, "ar", `https://cdn.novaex.ai/products/${input.slug}/ar.usdz`, { cloudinaryPublicId: `novaex/${input.slug}/ar`, format: "usdz", platform: "ios", fileSizeBytes: 3600000 });
