@@ -15,7 +15,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TiltCard } from "@/components/home/tilt-card";
-import { useHomeStore } from "@/stores/home-store";
+import { productsApi } from "@/lib/api/products";
+import { useAuthStore } from "@/stores/auth-store";
+import { useCommerceStore } from "@/stores/commerce-store";
 import type { ProductCard } from "@/types/catalog";
 import { cn, formatCurrency } from "@/lib/utils";
 
@@ -43,12 +45,13 @@ export function CatalogProductCard({
   compact?: boolean;
 }) {
   const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const wishlist = useHomeStore((state) => state.wishlist);
-  const compareList = useHomeStore((state) => state.compareList);
-  const toggleWishlist = useHomeStore((state) => state.toggleWishlist);
-  const addToCart = useHomeStore((state) => state.addToCart);
-  const toggleCompare = useHomeStore((state) => state.toggleCompare);
-  const isWishlisted = wishlist.includes(product.id);
+  const token = useAuthStore((state) => state.accessToken);
+  const wishlists = useCommerceStore((state) => state.wishlists);
+  const compareList = useCommerceStore((state) => state.compareList);
+  const toggleWishlist = useCommerceStore((state) => state.toggleWishlist);
+  const addToCart = useCommerceStore((state) => state.addToCart);
+  const toggleCompare = useCommerceStore((state) => state.toggleCompare);
+  const isWishlisted = wishlists.some((list) => list.items.some((item) => item.productId === product.id));
   const isCompared = compareList.includes(product.id);
 
   return (
@@ -86,7 +89,7 @@ export function CatalogProductCard({
                     aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                     onClick={(event) => {
                       event.preventDefault();
-                      toggleWishlist(product.id);
+                      void toggleWishlist({ token, productId: product.id });
                       toast.message(isWishlisted ? "Removed from wishlist" : "Saved to wishlist");
                     }}
                   >
@@ -175,9 +178,19 @@ export function CatalogProductCard({
               <Button
                 size="sm"
                 variant="gradient"
-                onClick={() => {
-                  addToCart(product.id);
-                  toast.success("Added to cart");
+                onClick={async () => {
+                  try {
+                    const { product: detail } = await productsApi.getById(product.id);
+                    const variantId = detail.variants[0]?.id;
+                    if (!variantId) {
+                      toast.error("No purchasable variant available");
+                      return;
+                    }
+                    await addToCart({ token, variantId, productId: product.id });
+                    toast.success("Added to cart");
+                  } catch {
+                    toast.error("Unable to add to cart");
+                  }
                 }}
               >
                 <ShoppingCart className="h-4 w-4" />

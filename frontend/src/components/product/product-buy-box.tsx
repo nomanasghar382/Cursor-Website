@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useHomeStore } from "@/stores/home-store";
+import { useAuthStore } from "@/stores/auth-store";
+import { useCommerceStore } from "@/stores/commerce-store";
 import type { ProductDetail, ProductVariantView } from "@/types/catalog";
 import { cn, formatCurrency } from "@/lib/utils";
 
@@ -20,11 +21,12 @@ export function ProductBuyBox({ product }: ProductBuyBoxProps) {
   const [quantity, setQuantity] = useState(1);
   const [postalCode, setPostalCode] = useState("");
   const [shippingEstimate, setShippingEstimate] = useState<string | null>(null);
-  const toggleWishlist = useHomeStore((state) => state.toggleWishlist);
-  const addToCart = useHomeStore((state) => state.addToCart);
-  const toggleCompare = useHomeStore((state) => state.toggleCompare);
-  const wishlist = useHomeStore((state) => state.wishlist);
-  const isWishlisted = wishlist.includes(product.id);
+  const token = useAuthStore((state) => state.accessToken);
+  const toggleWishlist = useCommerceStore((state) => state.toggleWishlist);
+  const addToCart = useCommerceStore((state) => state.addToCart);
+  const toggleCompare = useCommerceStore((state) => state.toggleCompare);
+  const wishlists = useCommerceStore((state) => state.wishlists);
+  const isWishlisted = wishlists.some((list) => list.items.some((item) => item.productId === product.id));
 
   const selectedVariant = useMemo(
     () => product.variants.find((variant) => variant.id === selectedVariantId) ?? product.variants[0],
@@ -162,7 +164,13 @@ export function ProductBuyBox({ product }: ProductBuyBoxProps) {
           className="flex-1"
           disabled={stock <= 0}
           onClick={() => {
-            addToCart(product.id, quantity);
+            if (!selectedVariant?.id) return;
+            void addToCart({
+              token,
+              variantId: selectedVariant.id,
+              productId: product.id,
+              quantity,
+            });
             toast.success("Added to cart");
           }}
         >
@@ -173,7 +181,7 @@ export function ProductBuyBox({ product }: ProductBuyBoxProps) {
           variant="outline"
           size="lg"
           onClick={() => {
-            toggleWishlist(product.id);
+            void toggleWishlist({ token, productId: product.id, variantId: selectedVariant?.id });
             toast.message(isWishlisted ? "Removed from wishlist" : "Saved for later");
           }}
         >
@@ -195,7 +203,7 @@ export function ProductBuyBox({ product }: ProductBuyBoxProps) {
           variant="ghost"
           size="sm"
           onClick={() => {
-            toggleWishlist(product.id);
+            void toggleWishlist({ token, productId: product.id, variantId: selectedVariant?.id });
             toast.message("Saved for later");
           }}
         >

@@ -2,6 +2,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { CommandPalette } from "@/components/search/command-palette";
 import { AnimatedBackground } from "@/components/motion/animated-background";
+import { MiniCartDrawer } from "@/components/cart/mini-cart-drawer";
 
 export default function CommerceLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function CommerceLayout({ children }: { children: React.ReactNode
       <main className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">{children}</main>
       <SiteFooter />
       <CommandPalette />
+      <MiniCartDrawer />
     </div>
   );
 }
